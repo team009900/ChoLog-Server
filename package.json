@@ -4,18 +4,19 @@
   "description": "cholog's server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint index.ts",
-    "lint:fix": "eslint --fix index.ts",
     "start": "nodemon app.js",
-    "start-prod": "NODE_ENV=production nodemon app.js"
+    "start-prod": "NODE_ENV=production nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/codestates/ChoLog-server.git"
   },
   "keywords": [
-    "node_modules"
+    "초록",
+    "ChoLog",
+    "식물관리",
+    "식물관리어플"
   ],
   "author": "009900",
   "license": "ISC",
@@ -26,19 +27,11 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
-    "dotenv": "^8.2.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "nodemon": "^2.0.2",
     "typescript": "^3.7.5"
-  },
-  "dependencies": {},
-  "eslintConfig": {
-    "extends": [
-      "airbnb",
-      "prettier"
-    ]
   }
 }
