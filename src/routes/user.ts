@@ -6,6 +6,6 @@ const router = express.Router();
 const { userController } = require("../controller");
 
 router.get("/:userName", userController.get);
-router.patch("/", userController.post);
+router.post("/", userController.post);
 
-module.exports = router;
+export default router;
