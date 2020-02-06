@@ -18,7 +18,18 @@
   "rules": {
     "no-console": 0,
     "no-unused-vars": 0,
-    "quotes": ["error", "double"]
+    "quotes": ["error", "double"],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never",
+        "json": "never"
+      }
+    ]
   },
   "settings": {
     "import/resolver": {
