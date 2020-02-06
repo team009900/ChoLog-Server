@@ -4,11 +4,13 @@ import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as morgan from "morgan";
 import * as helmet from "helmet";
+import "reflect-metadata";
+
 import { checkAuthentication } from "./middlewares";
 import * as indexRouter from "./routes";
 
 const app = express();
-const port = 4000;
+const port: number = 4000;
 
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -35,7 +37,8 @@ app.get("/", (req: any, res: any) => {
 });
 
 // ? auth check and routing
-app.use("/", checkAuthentication, indexRouter);
+// todo: add indexRouter
+app.use("/", checkAuthentication /* , indexRouter */);
 
 // todo: error catch
 
@@ -44,4 +47,4 @@ app.listen(app.get("port"), () => {
   console.log(`app is listening in PORT ${app.get("port")}`);
 });
 
-module.exports = app;
+export default app;
