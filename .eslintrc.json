@@ -1,6 +1,6 @@
 {
   "env": {
-    "commonjs": true,
+    "commonjs": false,
     "es6": true,
     "node": true
   },
@@ -11,6 +11,7 @@
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "project": "./tsconfig.json",
     "ecmaVersion": 2018
   },
   "plugins": ["@typescript-eslint"],
@@ -18,5 +19,12 @@
     "no-console": 0,
     "no-unused-vars": 0,
     "quotes": ["error", "double"]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
   }
 }
