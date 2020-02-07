@@ -7,6 +7,7 @@
     "start": "tsc-watch --onSuccess \"node build/app.js\"",
     "start-dev": "NODE_ENV=production tsc-watch --onSuccess \"node build/app.js\"",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc-watch",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "repository": {
