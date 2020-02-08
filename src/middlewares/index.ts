@@ -1,3 +1,5 @@
-const checkAuthentication = require("./checkAuthentication");
+import isLoggedIn from "./isLoggedIn";
+import isNotLoggedIn from "./isNotLoggedIn";
+import verifyToken from "./verifyToken";
 
-export { checkAuthentication };
+export { isLoggedIn, isNotLoggedIn, verifyToken };

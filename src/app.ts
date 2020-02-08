@@ -4,15 +4,19 @@ import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import * as morgan from "morgan";
 import * as helmet from "helmet";
-import "reflect-metadata";
+import * as passport from "passport";
+import * as createError from "http-errors";
 
-import { checkAuthentication } from "./middlewares";
-import * as indexRouter from "./routes";
+import { verifyToken } from "./middlewares";
+
+import authRouter from "./routes/auth";
+// import * passportConfig from './passport'
 
 const app = express();
-const port: number = 4000;
+const port = 4000;
 
 app.use(cookieParser());
+app.use(verifyToken);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -32,19 +36,53 @@ if (process.env.NODE_ENV === "production") {
   app.use(morgan("dev"));
 }
 
-app.get("/", (req: any, res: any) => {
+// app.use(passport.initialize()); // 요청(req 객체)에 passport 설정을 심는 미들웨어
+// app.use(passport.session()); // req.session 객체에 passport 정보를 저장하는 미들웨어
+
+app.get("/", (req: express.Request, res: express.Response) => {
   res.status(200).json("Success");
 });
 
-// ? auth check and routing
-// todo: add indexRouter
-app.use("/", checkAuthentication /* , indexRouter */);
+// Routes
+app.post(
+  "/verify",
+  verifyToken,
+  (req: express.Request, res: express.Response) => {
+    res.send("Verified");
+  },
+);
 
-// todo: error catch
+// app.use("/user", passport.authenticate("jwt", { session: false }), user);
+app.use("/auth", authRouter);
+
+// 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
+app.use(
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    next(createError(404));
+  },
+);
+
+// Errorhandler - 404 에러를 만들어내는 미들웨어(404 에러 핸들링)
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    // 개발 환경 로컬에서만 에러 제공
+    res.locals.message = err.message;
+    res.locals.error = req.app.get("env") === "development" ? err : {};
+
+    // 에러페이지 랜더
+    res.status(err.status || 500).send(err.message || "SERVER ERROR!");
+    res.render("error");
+  },
+);
 
 app.set("port", port);
 app.listen(app.get("port"), () => {
   console.log(`app is listening in PORT ${app.get("port")}`);
 });
 
-export default app;
+module.exports = app;
