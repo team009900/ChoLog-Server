@@ -5,11 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  BaseEntity,
   ManyToMany,
+  JoinTable,
 } from "typeorm";
+import Plant from "./Plant";
 
 @Entity()
-export default class users {
+export default class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -36,31 +39,48 @@ export default class users {
   provider!: string;
 
   @Column({ type: "tinyint", default: 1 })
-  commentAllow!: number; // (댓글) 2: 공개, 1: 친구공개, 0: 비공개
+  commentAllow!: number; // (댓글) 0: 비공개, 1: 친구공개, 2: 전체공개
 
   @Column({ type: "tinyint", default: 1 })
-  open!: number; // 2: 공개, 1: 친구공개, 0: 비공개
+  open!: number; // 0: 비공개, 1: 친구공개, 2: 전체공개
 
   @Column({ default: 0 })
   reports!: number; // 경고 횟수
 
-  @Column({ default: null, nullable: true })
+  @Column({ type: "timestamp", default: null, nullable: true })
   banned!: Date; // Date까지 계정 정지
 
   @Column({ default: 0 })
   seed!: number; // 앱 내 재화
 
-  @CreateDateColumn({
-    name: "created_at",
-    type: "timestamp",
-    default: "CURRENT_TIMESTAMP",
-  })
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
 
-  @UpdateDateColumn({
-    name: "updated_at",
-    type: "timestamp",
-    default: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
+
+  @OneToMany(
+    (type) => Plant,
+    (plant) => plant.user,
+    { cascade: true },
+  )
+  plants!: Plant[];
+
+  @ManyToMany((type) => User, { cascade: false })
+  @JoinTable({ name: "friends" })
+  friends!: User[];
+
+  //* Email로 유저찾는 메서드
+  static findByEmail(email: string): Promise<User | undefined> {
+    return this.createQueryBuilder("user")
+      .where("user.email = :email", { email })
+      .getOne();
+  }
+
+  //* username으로 유저찾기
+  static findByUsername(username: string): Promise<User | undefined> {
+    return this.createQueryBuilder("user")
+      .where("user.username = :username", { username })
+      .getOne();
+  }
 }
