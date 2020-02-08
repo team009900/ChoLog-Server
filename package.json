@@ -68,7 +68,7 @@
     "passport-kakao": "^1.0.0",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
-    "soket.io": "^0.0.1-security",
+    "socket.io": "^2.3.0",
     "typeorm": "^0.2.22"
   }
 }
