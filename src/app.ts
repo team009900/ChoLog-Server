@@ -7,14 +7,16 @@ import * as helmet from "helmet";
 import * as passport from "passport";
 import * as createError from "http-errors";
 
-import { isLoggedIn, verifyToken } from "./middlewares";
-import * as indexRouter from "./routes";
-import * passportConfig from './passport'
+import { verifyToken } from "./middlewares";
+
+import authRouter from "./routes/auth";
+// import * passportConfig from './passport'
 
 const app = express();
 const port = 4000;
 
 app.use(cookieParser());
+app.use(verifyToken);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -34,8 +36,8 @@ if (process.env.NODE_ENV === "production") {
   app.use(morgan("dev"));
 }
 
-app.use(passport.initialize()); // 요청(req 객체)에 passoport 설정을 심는 미들웨어
-app.use(passport.session()); // req.session 객체에 passport 정보를 저장하는 미들웨어
+// app.use(passport.initialize()); // 요청(req 객체)에 passport 설정을 심는 미들웨어
+// app.use(passport.session()); // req.session 객체에 passport 정보를 저장하는 미들웨어
 
 app.get("/", (req: express.Request, res: express.Response) => {
   res.status(200).json("Success");
@@ -49,10 +51,9 @@ app.post(
     res.send("Verified");
   },
 );
-// ? indexRouter
-app.use("/", indexRouter);
-app.use('/user', passport.authenticate('jwt', {session: false}), user);
-app.use('/auth', authRouter)
+
+// app.use("/user", passport.authenticate("jwt", { session: false }), user);
+app.use("/auth", authRouter);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use(
