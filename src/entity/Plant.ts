@@ -7,10 +7,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
 import User from "./User";
 import Family from "./Family";
 import Diary from "./Diary";
+import Parameter from "./Parameter";
 
 @Entity()
 export default class Plant extends BaseEntity {
@@ -29,7 +32,7 @@ export default class Plant extends BaseEntity {
   @Column({ nullable: true })
   scientificName!: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   adoptionDate!: Date;
 
   @Column({ type: "timestamp", nullable: true })
@@ -44,10 +47,10 @@ export default class Plant extends BaseEntity {
   @Column({ type: "tinyint", default: 1 })
   openAllow!: number; // 0: 비공개, 1: 친구공개, 2: 전체공개
 
-  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  @CreateDateColumn({ type: "timestamp" })
   public createdAt!: Date;
 
-  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  @UpdateDateColumn({ type: "timestamp" })
   public updatedAt!: Date;
 
   @ManyToOne(
@@ -68,10 +71,24 @@ export default class Plant extends BaseEntity {
   )
   diaries!: Diary[];
 
+  @ManyToMany((type) => Parameter)
+  @JoinTable({ name: "plant_parameter" })
+  parameters!: Parameter[];
+
   //* plant id로 Plant찾기
   static findById(id: number): Promise<Plant | undefined> {
     return this.createQueryBuilder("plant")
       .where("plant.id = :id", { id })
       .getOne();
+  }
+
+  //* plant id로 diaries찾기
+  static async findDiariesById(id: number): Promise<Diary[] | undefined> {
+    const plant = await this.findById(id);
+
+    if (plant === undefined) {
+      return undefined;
+    }
+    return plant.diaries;
   }
 }
