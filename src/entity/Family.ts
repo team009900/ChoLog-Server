@@ -1,9 +1,15 @@
-import { Entity, BaseEntity, PrimaryColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  BaseEntity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+} from "typeorm";
 import Plant from "./Plant";
 
 @Entity()
 export default class Family extends BaseEntity {
-  @PrimaryColumn({ unsigned: true })
+  @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
   @Column()
