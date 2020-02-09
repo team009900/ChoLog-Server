@@ -10,6 +10,7 @@ import {
   JoinTable,
 } from "typeorm";
 import Plant from "./Plant";
+import { user } from "../@types/entity/index.d";
 
 @Entity()
 export default class User extends BaseEntity {
@@ -53,10 +54,10 @@ export default class User extends BaseEntity {
   @Column({ default: 0 })
   seed!: number; // 앱 내 재화
 
-  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  @CreateDateColumn({ type: "timestamp" })
   public createdAt!: Date;
 
-  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  @UpdateDateColumn({ type: "timestamp" })
   public updatedAt!: Date;
 
   @OneToMany(
@@ -77,10 +78,31 @@ export default class User extends BaseEntity {
       .getOne();
   }
 
-  //* username으로 유저찾기
-  static findByUsername(username: string): Promise<User | undefined> {
-    return this.createQueryBuilder("user")
-      .where("user.username = :username", { username })
-      .getOne();
+  private static findUserById(id: number) {
+    return this.createQueryBuilder("user").where("user.id = :id", { id });
+  }
+
+  //* user id 로 유저찾기
+  static findById(id: number): Promise<User | undefined> {
+    return this.findUserById(id).getOne();
+  }
+
+  //* user id 로 plants 찾기
+  static async findPlantsById(id: number): Promise<Plant[] | undefined> {
+    const target = await this.findById(id);
+
+    if (target === undefined) {
+      return undefined;
+    }
+    return target.plants;
+  }
+
+  //* user id 로 user 정보 수정 (되는지 안되는지 해봐야 함)
+  static modifyById(id: number, data: user) {
+    return this.createQueryBuilder()
+      .update(User)
+      .set(data)
+      .where("id = :id", { id })
+      .execute();
   }
 }
