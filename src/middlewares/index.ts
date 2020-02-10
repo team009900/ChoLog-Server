@@ -1,5 +1,5 @@
-import * as isLoggedIn from "./isLoggedIn";
-import * as isNotLoggedIn from "./isNotLoggedIn";
-import * as verfiyToken from "./verifyToken";
+import isLoggedIn from "./isLoggedIn";
+import isNotLoggedIn from "./isNotLoggedIn";
+import verifyToken from "./verifyToken";
 
-export { isLoggedIn, isNotLoggedIn, verfiyToken };
+export { isLoggedIn, isNotLoggedIn, verifyToken };
