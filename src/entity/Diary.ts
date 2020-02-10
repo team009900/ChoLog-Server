@@ -7,6 +7,7 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import Plant from "./Plant";
 import State from "./State";
@@ -34,8 +35,11 @@ export default class Diary extends BaseEntity {
   @Column({ nullable: true })
   finedust!: number;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  public updatedAt!: Date;
 
   @ManyToOne(
     (type) => Plant,

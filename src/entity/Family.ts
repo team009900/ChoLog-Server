@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import Plant from "./Plant";
 
@@ -14,6 +16,12 @@ export default class Family extends BaseEntity {
 
   @Column()
   familyName!: string;
+
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  public createdAt!: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  public updatedAt!: Date;
 
   @OneToMany(
     (type) => Plant,

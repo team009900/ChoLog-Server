@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import State from "./State";
 
@@ -17,6 +19,12 @@ export default class Parameter extends BaseEntity {
 
   @Column({ type: "tinyint", default: 0 })
   type!: number; // 0: on,off타입 / 1: 1,2,3타입
+
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  public createdAt!: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  public updatedAt!: Date;
 
   @OneToMany(
     (type) => State,

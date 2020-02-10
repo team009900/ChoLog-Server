@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import API from "./API";
 
@@ -26,6 +28,12 @@ export default class PlantsDatabase extends BaseEntity {
 
   @Column()
   contentsNo!: number;
+
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  public createdAt!: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  public updatedAt!: Date;
 
   @ManyToOne(
     (type) => API,

@@ -47,10 +47,10 @@ export default class Plant extends BaseEntity {
   @Column({ type: "tinyint", default: 1 })
   openAllow!: number; // 0: 비공개, 1: 친구공개, 2: 전체공개
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
   @ManyToOne(

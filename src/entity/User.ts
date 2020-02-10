@@ -54,10 +54,10 @@ export default class User extends BaseEntity {
   @Column({ default: 0 })
   seed!: number; // 앱 내 재화
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
   @OneToMany(
