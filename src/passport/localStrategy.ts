@@ -2,7 +2,7 @@
 import * as passportLocal from "passport-local";
 import { createConnection } from "typeorm";
 import * as bcrypt from "bcrypt";
-import * as Users from "../entity/users";
+import * as Users from "../entity/User";
 // 기존 방식: 인증 처리하는 middleware를 직접 구현.
 // 새 방식:
 // - 1. 인증 처리하는 middleware로 passport를 사용. 따라서 기존의 middleware에 담긴 코드를 passport의 콜백 함수들로 옮겨줘야 함.
@@ -31,9 +31,7 @@ export default (passport: any) => {
             try {
               // const user = await connection.manager.find(Users);
               const userRepository = connection.getRepository(Users);
-              const exUser = await userRepository.findOne({
-                where: { email },
-              }); // 사용자 데이터베이스에서 일치하는 이메일이 있는 지 찾는다.
+              const exUser = await userRepository.findOne({ where: { email } }); // 사용자 데이터베이스에서 일치하는 이메일이 있는 지 찾는다.
               if (exUser) {
                 const result = await bcrypt.compare(password, exUser.password); // 있다면 bcrypt의 compare함수로 비밀번호를 비교한다.
                 if (result) {
