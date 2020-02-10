@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 
 const get = (req: Request, res: Response, next: NextFunction): void => {
-  const a = 1;
+  const { userId } = req.params;
+  res.json(`user get. userId: ${userId}`);
 };
 
-const post = (req: Request, res: Response, next: NextFunction): void => {
-  const a = 1;
+const patch = (req: Request, res: Response, next: NextFunction): void => {
+  res.json("user patch");
 };
 
-export { get, post };
+const remove = (req: Request, res: Response, next: NextFunction): void => {
+  res.json("user delete");
+};
+
+export { get, patch, remove as delete };

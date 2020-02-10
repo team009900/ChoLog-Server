@@ -1,11 +1,16 @@
 import * as express from "express";
-
-const router = express.Router();
+import { userController } from "../controller";
 // console.log(typeof verifyToken, verifyToken);
 
-const { userController } = require("../controller");
+const router = express.Router();
 
-router.get("/:userName", userController.get);
-router.post("/", userController.post);
+//* GET /user/:userId
+router.get("/:userId", userController.get);
+
+//* PATCH /user
+router.patch("/", userController.patch);
+
+//* DELETE /user
+router.delete("/", userController.delete);
 
 export default router;
