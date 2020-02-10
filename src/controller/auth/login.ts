@@ -1,27 +1,52 @@
 import { Request, Response, NextFunction } from "express";
-import * as bcrypt from "bcrypt";
+import * as passport from "passport";
 import * as jwt from "jsonwebtoken";
+import User from "../../entity/User";
 
-import Users from "../../entity/users";
-
-export default {
-  post: async (req: Request, res: Response): Promise<Response> => {
-    passport.authenticate("local", { session: false }, (err, user, info) => {
-      if (err || !user) {
-        return res.status(400).json({
-          message: "Something is not right",
-          user,
-        });
-      }
-      req.login(user, { session: false }, (err) => {
-        if (err) {
-          res.send(err);
+// passport.authenticate('local') 미들웨어가 로컬 로그인을 수행.
+export default (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate(
+    "local",
+    { session: false },
+    async (authError: any, user: any, info: any) => {
+      try {
+        const { email } = req.body;
+        const exUser = await User.findByEmail(email);
+        if (exUser === undefined) {
+          next(authError);
+          return;
         }
-        // eslint-disable-next-line max-len
-        // generate a signed son web token with the contents of user object and return it in the response
-        const token = jwt.sign(user, "your_jwt_secret");
-        return res.json({ user, token });
-      });
-    })(req, res);
-  },
+        if (authError || !user) {
+          next(authError);
+          return;
+        }
+
+        const jwtSecret = process.env.JWT_SECRET;
+        if (jwtSecret === undefined) {
+          next(new Error("Empty Secret"));
+          return;
+        }
+
+        req.login(user, { session: false }, async (loginError) => {
+          if (loginError) return next(loginError);
+
+          const token = jwt.sign(
+            {
+              id: exUser.id,
+              name: exUser.username,
+            },
+            jwtSecret,
+            {
+              expiresIn: "1d",
+              issuer: "009900",
+            },
+          );
+          res.cookie("token", token);
+          return res.json({ id: user.id, name: user.name, email: user.email });
+        });
+      } catch (error) {
+        res.status(400).send(error);
+      }
+    },
+  )(req, res, next); // 미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
 };
