@@ -7,8 +7,6 @@ import * as helmet from "helmet";
 import * as passport from "passport";
 import * as createError from "http-errors";
 
-import { verifyToken } from "./middlewares";
-
 import authRouter from "./routes/auth";
 // import * passportConfig from './passport'
 
@@ -16,7 +14,6 @@ const app = express();
 const port = 4000;
 
 app.use(cookieParser());
-app.use(verifyToken);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -44,13 +41,6 @@ app.get("/", (req: express.Request, res: express.Response) => {
 });
 
 // Routes
-app.post(
-  "/verify",
-  verifyToken,
-  (req: express.Request, res: express.Response) => {
-    res.send("Verified");
-  },
-);
 
 // app.use("/user", passport.authenticate("jwt", { session: false }), user);
 app.use("/auth", authRouter);
