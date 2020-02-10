@@ -32,8 +32,8 @@ export default (req: Request, res: Response, next: NextFunction) => {
 
           const token = jwt.sign(
             {
-              id: exUser.id,
-              name: exUser.username,
+              id: user.id,
+              name: user.username,
             },
             jwtSecret,
             {
@@ -42,10 +42,14 @@ export default (req: Request, res: Response, next: NextFunction) => {
             },
           );
           res.cookie("token", token);
-          return res.json({ id: user.id, name: user.name, email: user.email });
+          return res.json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+          });
         });
-      } catch (error) {
-        res.status(400).send(error);
+      } catch (err) {
+        res.status(400).send(err);
       }
     },
   )(req, res, next); // 미들웨어 내의 미들웨어에는 (req, res, next)를 붙인다.
