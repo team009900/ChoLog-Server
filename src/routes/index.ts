@@ -1,5 +1,8 @@
-import * as express from "express";
+import auth from "./auth";
+import diary from "./diary";
+import parameters from "./parameters";
+import plant from "./plant";
+import plantsdb from "./plantsdb";
+import user from "./user";
 
-const router = express.Router();
-
-export default router;
+export { auth, diary, parameters, plant, plantsdb, user };
