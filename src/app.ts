@@ -6,11 +6,14 @@ import * as morgan from "morgan";
 import * as helmet from "helmet";
 import * as passport from "passport";
 import * as createError from "http-errors";
+import ormConnection from "./entity";
 
 // import { isLoggedIn } from "./middlewares";
 
 import * as routes from "./routes";
 // import * passportConfig from './passport'
+
+ormConnection.then(() => console.log("typeorm connection completed"));
 
 const app = express();
 const port = 4000;
@@ -22,7 +25,7 @@ app.use(
   cors({
     origin: process.env.NODE_ENV
       ? process.env.PROD_CORS_ORIGIN
-      : "http://localhost:8081", // 추후 변경(핼프데스크 질문)
+      : ["http://localhost:8081", "http://10.0.2.2:8081"], // 추후 변경(핼프데스크 질문)
     methods: ["GET", "POST", "DELETE", "PATCH"],
     credentials: true,
   }),
