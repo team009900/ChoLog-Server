@@ -6,9 +6,14 @@ import * as morgan from "morgan";
 import * as helmet from "helmet";
 import * as passport from "passport";
 import * as createError from "http-errors";
+import ormConnection from "./entity";
 
-import authRouter from "./routes/auth";
+// import { isLoggedIn } from "./middlewares";
+
+import * as routes from "./routes";
 // import * passportConfig from './passport'
+
+ormConnection.then(() => console.log("typeorm connection completed"));
 
 const app = express();
 const port = 4000;
@@ -20,7 +25,7 @@ app.use(
   cors({
     origin: process.env.NODE_ENV
       ? process.env.PROD_CORS_ORIGIN
-      : "http://localhost:8081", // 추후 변경(핼프데스크 질문)
+      : ["http://localhost:8081", "http://10.0.2.2:8081"], // 추후 변경(핼프데스크 질문)
     methods: ["GET", "POST", "DELETE", "PATCH"],
     credentials: true,
   }),
@@ -41,9 +46,29 @@ app.get("/", (req: express.Request, res: express.Response) => {
 });
 
 // Routes
+// app.post(
+//   "/verify",
+//   verifyToken,
+//   (req: express.Request, res: express.Response) => {
+//     res.send("Verified");
+//   },
+// );
 
-// app.use("/user", passport.authenticate("jwt", { session: false }), user);
-app.use("/auth", authRouter);
+// ? isLoggedIn 구현 전 임시 함수
+const isLoggedIn = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+): void => {
+  next();
+};
+
+app.use("/auth", routes.auth);
+app.use("/diary", isLoggedIn, routes.diary);
+app.use("/parameters", isLoggedIn, routes.parameters);
+app.use("/plant", isLoggedIn, routes.plant);
+app.use("/plantsdb", isLoggedIn, routes.plantsdb);
+app.use("/user", isLoggedIn, routes.user);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use(
@@ -53,22 +78,15 @@ app.use(
 );
 
 // Errorhandler - 404 에러를 만들어내는 미들웨어(404 에러 핸들링)
-app.use(
-  (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) => {
-    // 개발 환경 로컬에서만 에러 제공
-    res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
+app.use((err: any, req: express.Request, res: express.Response) => {
+  // 개발 환경 로컬에서만 에러 제공
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-    // 에러페이지 랜더
-    res.status(err.status || 500).send(err.message || "SERVER ERROR!");
-    res.render("error");
-  },
-);
+  // 에러페이지 랜더
+  res.status(err.status || 500).send(err.message || "SERVER ERROR!");
+  res.render("error");
+});
 
 app.set("port", port);
 app.listen(app.get("port"), () => {

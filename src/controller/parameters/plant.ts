@@ -1,22 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 
 const post = (req: Request, res: Response, next: NextFunction): void => {
-  res.json("plant post");
+  const { plantId } = req.params;
+  res.json(`plant parameters post. plantId: ${plantId}`);
 };
 
 const get = (req: Request, res: Response, next: NextFunction): void => {
   const { plantId } = req.params;
-  res.json(`plant get. plantId: ${plantId}`);
+  res.json(`plant parameters get. plantId: ${plantId}`);
 };
 
 const patch = (req: Request, res: Response, next: NextFunction): void => {
   const { plantId } = req.params;
-  res.json(`plant patch. plantId: ${plantId}`);
+  res.json(`plant parameters patch. plantId: ${plantId}`);
 };
 
-const remove = (req: Request, res: Response, next: NextFunction): void => {
-  const { plantId } = req.params;
-  res.json(`plant delete. plantId: ${plantId}`);
-};
-
-export { post, get, patch, remove as delete };
+export { post, get, patch };
