@@ -63,11 +63,11 @@ export default class User extends BaseEntity {
   @OneToMany(
     (type) => Plant,
     (plant) => plant.user,
-    { cascade: true },
+    { cascade: true, onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   plants!: Plant[];
 
-  @ManyToMany((type) => User, { cascade: false })
+  @ManyToMany((type) => User)
   @JoinTable({ name: "friends" })
   friends!: User[];
 

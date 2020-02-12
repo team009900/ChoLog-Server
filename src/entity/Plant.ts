@@ -56,12 +56,14 @@ export default class Plant extends BaseEntity {
   @ManyToOne(
     (type) => User,
     (user) => user.plants,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   user!: User;
 
   @ManyToOne(
     (type) => Family,
     (family) => family.plants,
+    { onDelete: "SET NULL", onUpdate: "CASCADE" },
   )
   family!: Family;
 

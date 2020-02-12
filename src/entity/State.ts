@@ -26,6 +26,7 @@ export default class State extends BaseEntity {
   @ManyToOne(
     (type) => Parameter,
     (parameter) => parameter.states,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   parameter!: Parameter;
 }
