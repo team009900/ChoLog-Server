@@ -1,5 +1,4 @@
-// import * as local from "./localStrategy";
-// import * as kakao from "./kakaoStrategy";
-// import Users from "../entity/users";
+// import local from "./localStrategy";
+// // import * as kakaoStrategy from "./kakaoStrategy";
 
-export default (passport: any) => {};
+// export default local;

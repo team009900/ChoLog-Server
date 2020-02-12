@@ -1,6 +1,5 @@
 import * as express from "express";
 import { userController } from "../controller";
-// console.log(typeof verifyToken, verifyToken);
 
 const router = express.Router();
 

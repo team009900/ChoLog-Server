@@ -36,7 +36,7 @@ export default class User extends BaseEntity {
   @Column({ unique: true, nullable: true })
   snsId!: string;
 
-  @Column()
+  @Column({ default: "local" })
   provider!: string;
 
   @Column({ type: "tinyint", default: 1 })
@@ -73,6 +73,7 @@ export default class User extends BaseEntity {
 
   //* Email로 유저찾는 메서드
   static findByEmail(email: string): Promise<User | undefined> {
+    console.log({ email });
     return this.createQueryBuilder("user")
       .where("user.email = :email", { email })
       .getOne();
@@ -103,6 +104,19 @@ export default class User extends BaseEntity {
       .update(User)
       .set(data)
       .where("id = :id", { id })
+      .execute();
+  }
+
+  static createUser(
+    id: number,
+    email: string,
+    username: string,
+    password: string,
+  ) {
+    return this.createQueryBuilder()
+      .insert()
+      .into(User)
+      .values({ id, email, username, password })
       .execute();
   }
 }
