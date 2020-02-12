@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: process.env.NODE_ENV
       ? process.env.PROD_CORS_ORIGIN
-      : ["http://localhost:8081", "http://10.0.2.2:8081"], // 추후 변경(핼프데스크 질문)
+      : ["http://localhost:8081", "http://10.0.2.2:8081"], // 추후 변경
     methods: ["GET", "POST", "DELETE", "PATCH"],
     credentials: true,
   }),
