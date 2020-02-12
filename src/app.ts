@@ -6,14 +6,14 @@ import * as morgan from "morgan";
 import * as helmet from "helmet";
 import * as passport from "passport";
 import * as createError from "http-errors";
-import ormConnection from "./entity";
-
-// import { isLoggedIn } from "./middlewares";
-
+import { createConnection } from "typeorm";
+import "dotenv/config";
 import * as routes from "./routes";
-// import * passportConfig from './passport'
+import auth from "./routes/auth";
 
-ormConnection.then(() => console.log("typeorm connection completed"));
+import "./passport/localStrategy";
+
+createConnection().then(() => console.log("typeorm connection completed"));
 
 const app = express();
 const port = 4000;
@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(morgan("dev"));
 }
 
-// app.use(passport.initialize()); // 요청(req 객체)에 passport 설정을 심는 미들웨어
+app.use(passport.initialize()); // 요청(req 객체)에 passport 설정을 심는 미들웨어
 // app.use(passport.session()); // req.session 객체에 passport 정보를 저장하는 미들웨어
 
 app.get("/", (req: express.Request, res: express.Response) => {
@@ -46,29 +46,13 @@ app.get("/", (req: express.Request, res: express.Response) => {
 });
 
 // Routes
-// app.post(
-//   "/verify",
-//   verifyToken,
-//   (req: express.Request, res: express.Response) => {
-//     res.send("Verified");
-//   },
-// );
-
-// ? isLoggedIn 구현 전 임시 함수
-const isLoggedIn = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction,
-): void => {
-  next();
-};
-
-app.use("/auth", routes.auth);
-app.use("/diary", isLoggedIn, routes.diary);
-app.use("/parameters", isLoggedIn, routes.parameters);
-app.use("/plant", isLoggedIn, routes.plant);
-app.use("/plantsdb", isLoggedIn, routes.plantsdb);
-app.use("/user", isLoggedIn, routes.user);
+app.use("/auth", auth);
+// app.use("/user", passport.authenticate("jwt", { session: false }), user);
+app.use("/diary", routes.diary);
+app.use("/parameters", routes.parameters);
+app.use("/plant", routes.plant);
+app.use("/plantsdb", routes.plantsdb);
+app.use("/user", routes.user);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use(

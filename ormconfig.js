@@ -5,7 +5,7 @@ const ConnectionOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: "ChoLog",
-  synchronize: true,
+  synchronize: false, //db테이블이랑 schema랑 일치 시키는 것.
   logging: false,
   entities: ["build/entity/**/*.js"],
   migrations: ["build/migration/**/*.js"],

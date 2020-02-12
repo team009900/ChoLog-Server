@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as passport from "passport";
 import * as jwt from "jsonwebtoken";
-import User from "../../entity/User";
+// import * as jwtSecret from "../../../key";
 
 // passport.authenticate('local') 미들웨어가 로컬 로그인을 수행.
 export default (req: Request, res: Response, next: NextFunction) => {
@@ -10,43 +10,45 @@ export default (req: Request, res: Response, next: NextFunction) => {
     { session: false },
     async (authError: any, user: any, info: any) => {
       try {
-        const { email } = req.body;
-        const exUser = await User.findByEmail(email);
-        if (exUser === undefined) {
-          next(authError);
-          return;
-        }
         if (authError || !user) {
           next(authError);
           return;
-        }
-
-        const jwtSecret = process.env.JWT_SECRET;
-        if (jwtSecret === undefined) {
-          next(new Error("Empty Secret"));
-          return;
+          // res.status(400).json({
+          //   message: info ? info.message : "Login failed",
+          //   user,
+          // });
         }
 
         req.login(user, { session: false }, async (loginError) => {
           if (loginError) return next(loginError);
+          // if (loginError) {
+          //   res.status(400).send({ loginError });
+          // }
 
           const token = jwt.sign(
             {
               id: user.id,
-              name: user.username,
+              username: user.username,
             },
-            jwtSecret,
+            "jwtSecret",
             {
               expiresIn: "1d",
               issuer: "009900",
             },
           );
-          res.cookie("token", token);
-          return res.json({
-            id: user.id,
-            username: user.username,
-            email: user.email,
+
+          res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
           });
+
+          // return res.status(200).json({
+          //   id: user.id,
+          //   username: user.username,
+          //   email: user.email,
+          // });
+          return res.status(200).json({ user, token });
+          // console.log({ user, token });
         });
       } catch (err) {
         res.status(400).send(err);
