@@ -5,7 +5,7 @@ const ConnectionOptions = {
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: "ChoLog",
-  synchronize: true,
+  synchronize: false,
   logging: false,
   entities: ["build/entity/**/*.js"],
   migrations: ["build/migration/**/*.js"],
