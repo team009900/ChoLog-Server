@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { Request } from "express";
 import * as passportLocal from "passport-local";
 import * as passport from "passport";
 import * as passportJWT from "passport-jwt";
@@ -14,6 +15,14 @@ import User from "../entity/User";
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
+
+// const cookieExtractor = (req: Request) => {
+//   let token = null;
+//   if (req && req.cookies) {
+//     token = req.cookies.jwt;
+//   }
+//   return token;
+// };
 
 // const local = passport;
 passport.use(
@@ -48,8 +57,9 @@ passport.use(
 passport.use(
   new JWTStrategy(
     {
-      jwtFromRequest: ExtractJWT.fromHeader("authorization"),
-      // jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      // jwtFromRequest: ExtractJWT.fromHeader("authorization"),
+      // jwtFromRequest: cookieExtractor,
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
       secretOrKey: "jwtSecret",
       // secretOrKey: "secret",
     },
