@@ -20,6 +20,12 @@ export default class Parameter extends BaseEntity {
   @Column({ type: "tinyint", default: 0 })
   type!: number; // 0: on,off타입 / 1: 1,2,3타입
 
+  @Column()
+  color!: string;
+
+  @Column()
+  description!: string;
+
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
 
