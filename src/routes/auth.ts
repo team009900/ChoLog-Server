@@ -1,19 +1,19 @@
 import * as express from "express";
 
-// import * as authController from "../controller/auth";
-// import { isLoggedIn, isNotLoggedIn } from "../middlewares";
+import * as authController from "../controller/auth";
+import { isNotLoggedIn, isLoggedIn } from "../middlewares";
 
 const router = express.Router();
 
 // router.use(isNotLoggedIn);
 
-// // * POST /user/signup
-// router.post("/signup", isNotLoggedIn, authController.signup.post);
+// * POST /auth/signup
+router.post("/signup", isNotLoggedIn, authController.signup);
 
-// // * POST  /user/login
-// router.post("/login", isNotLoggedIn, authController.login.post);
+// * POST  /auth/login
+router.post("/login", isNotLoggedIn, authController.login);
 
-// // * POST /user/logout
-// router.post("/logout", isLoggedIn, authController.logout.post);
+// * POST /auth/logout
+router.post("/logout", isLoggedIn, authController.logout);
 
 export default router;

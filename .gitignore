@@ -1,12 +1,10 @@
 yarn.lock
-yarn-error.log
-package-lock.json
-.idea/
+
 .vscode/
 node_modules/
 build/
 tmp/
 temp/
-
+.http
 # dotenv environment variables file
 .env
