@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { hashSync } from "bcryptjs";
-import { getConnection } from "typeorm";
 import User from "../../entity/User";
 
 export default async (req: Request, res: Response) => {
@@ -27,12 +26,7 @@ export default async (req: Request, res: Response) => {
       }
       const hash = hashSync(password, 12);
 
-      const newUser = getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(User)
-        .values({ id, email, username, password: hash })
-        .execute();
+      const newUser = User.createUser(id, email, username, hash);
       console.log({ newUser });
 
       return res.status(201).json({
