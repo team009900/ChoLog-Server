@@ -6,8 +6,12 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  InsertResult,
+  OneToMany,
 } from "typeorm";
 import API from "./API";
+// import { plantsDatabase } from "../@types/entity";
+import PlantDataImg from "./PlantDataImg";
 
 @Entity()
 export default class PlantsDatabase extends BaseEntity {
@@ -24,10 +28,13 @@ export default class PlantsDatabase extends BaseEntity {
   englishName!: string;
 
   @Column()
-  detailImg!: string;
-
-  @Column()
   contentsNo!: number;
+
+  @OneToMany(
+    (type) => PlantDataImg,
+    (plantDataImg) => plantDataImg.plantData,
+  )
+  images!: PlantDataImg[];
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
@@ -38,6 +45,7 @@ export default class PlantsDatabase extends BaseEntity {
   @ManyToOne(
     (type) => API,
     (api) => api.plantsDataList,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   api!: API;
 
