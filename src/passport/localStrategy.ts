@@ -5,6 +5,7 @@ import * as passport from "passport";
 import * as passportJWT from "passport-jwt";
 import { compareSync } from "bcryptjs";
 import User from "../entity/User";
+import "dotenv/config";
 
 // import jwtSecret from "../../key";
 // 기존 방식: 인증 처리하는 middleware를 직접 구현.
@@ -60,8 +61,8 @@ passport.use(
       // jwtFromRequest: ExtractJWT.fromHeader("authorization"),
       // jwtFromRequest: cookieExtractor,
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: "jwtSecret",
-      // secretOrKey: "secret",
+      // secretOrKey: "jwtSecret",
+      secretOrKey: process.env.JWT_SECRET,
     },
     async (jwtPayload: any, done: any) => {
       try {
