@@ -6,6 +6,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  InsertResult,
 } from "typeorm";
 import PlantsDatabase from "./PlantsDatabase";
 
@@ -29,4 +30,12 @@ export default class PlantDataImg extends BaseEntity {
     { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   plantData!: PlantsDatabase;
+
+  static insertPlantDataImg(image: string): Promise<InsertResult> {
+    return this.createQueryBuilder()
+      .insert()
+      .into(PlantDataImg)
+      .values({ image })
+      .execute();
+  }
 }
