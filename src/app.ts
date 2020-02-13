@@ -12,6 +12,7 @@ import * as routes from "./routes";
 import auth from "./routes/auth";
 
 import "./passport/localStrategy";
+import { isLoggedIn } from "./middlewares";
 
 createConnection().then(() => console.log("typeorm connection completed"));
 
@@ -39,7 +40,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(passport.initialize()); // 요청(req 객체)에 passport 설정을 심는 미들웨어
-// app.use(passport.session()); // req.session 객체에 passport 정보를 저장하는 미들웨어
 
 app.get("/", (req: express.Request, res: express.Response) => {
   res.status(200).json("Success");
@@ -47,28 +47,36 @@ app.get("/", (req: express.Request, res: express.Response) => {
 
 // Routes
 app.use("/auth", auth);
-// app.use("/user", passport.authenticate("jwt", { session: false }), user);
 app.use(
   "/diary",
-  passport.authenticate("jwt", { session: false }),
+  isLoggedIn, // 2. 토큰이 있으면 블랙리스트 토큰인 지 확인
+  passport.authenticate("jwt", { session: false }), // 1. 토큰이 있는 자만 접근할 수 있는 미들웨어(토큰 유효기간도 같이 검사)
   routes.diary,
 );
 app.use(
   "/parameters",
+  isLoggedIn,
   passport.authenticate("jwt", { session: false }),
   routes.parameters,
 );
 app.use(
   "/plant",
+  isLoggedIn,
   passport.authenticate("jwt", { session: false }),
   routes.plant,
 );
 app.use(
   "/plantsdb",
+  isLoggedIn,
   passport.authenticate("jwt", { session: false }),
   routes.plantsdb,
 );
-app.use("/user", passport.authenticate("jwt", { session: false }), routes.user);
+app.use(
+  "/user",
+  isLoggedIn,
+  passport.authenticate("jwt", { session: false }),
+  routes.user,
+);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use(

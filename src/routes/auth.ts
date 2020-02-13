@@ -1,5 +1,5 @@
 import * as express from "express";
-
+import * as passport from "passport";
 import * as authController from "../controller/auth";
 import { isNotLoggedIn, isLoggedIn } from "../middlewares";
 
@@ -14,6 +14,11 @@ router.post("/signup", isNotLoggedIn, authController.signup);
 router.post("/login", isNotLoggedIn, authController.login);
 
 // * POST /auth/logout
-router.post("/logout", isLoggedIn, authController.logout);
+router.post(
+  "/logout",
+  isLoggedIn,
+  passport.authenticate("jwt", { session: false }),
+  authController.logout,
+);
 
 export default router;
