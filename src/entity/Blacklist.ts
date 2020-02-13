@@ -5,8 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
-  OneToOne,
-  JoinColumn,
+  ManyToOne,
 } from "typeorm";
 import User from "./User";
 
@@ -15,7 +14,7 @@ export default class Blacklist extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: false })
+  @Column({ unique: true })
   token!: string;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
@@ -24,8 +23,10 @@ export default class Blacklist extends BaseEntity {
   @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
-  @OneToOne((type) => User)
-  @JoinColumn()
+  @ManyToOne(
+    (type) => User,
+    (user) => user.blacklist,
+  )
   user!: User;
 
   static findByToken(token: string): Promise<Blacklist | undefined> {
