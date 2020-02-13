@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import Plant from "./Plant";
 import { user } from "../@types/entity/index.d";
+import Blacklist from "./Blacklist";
 
 @Entity()
 export default class User extends BaseEntity {
@@ -71,6 +72,12 @@ export default class User extends BaseEntity {
   @JoinTable({ name: "friends" })
   friends!: User[];
 
+  @OneToMany(
+    (type) => Blacklist,
+    (blacklist) => blacklist.user,
+  )
+  blacklist!: Blacklist[];
+
   //* Email로 유저찾는 메서드
   static findByEmail(email: string): Promise<User | undefined> {
     console.log({ email });
@@ -107,6 +114,7 @@ export default class User extends BaseEntity {
       .execute();
   }
 
+  // * 회원가입 유저 생성
   static createUser(
     id: number,
     email: string,
