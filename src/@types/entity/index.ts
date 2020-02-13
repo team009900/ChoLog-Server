@@ -9,10 +9,10 @@ declare namespace entity {
 
   interface plantsDatabaseType {
     distributionName: string;
-    scientificName: string;
-    englishName: string;
+    scientificName?: string;
+    englishName?: string;
     contentsNo: number;
-    images: PlantDataImg[];
+    images?: PlantDataImg[];
     api: () => string;
   }
 }
