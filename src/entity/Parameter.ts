@@ -23,7 +23,7 @@ export default class Parameter extends BaseEntity {
   @Column()
   color!: string;
 
-  @Column()
+  @Column({ nullable: true })
   description!: string;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
