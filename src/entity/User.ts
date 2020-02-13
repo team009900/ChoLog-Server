@@ -10,7 +10,7 @@ import {
   JoinTable,
 } from "typeorm";
 import Plant from "./Plant";
-import { user } from "../@types/entity/index.d";
+import { userType } from "../@types/entity";
 
 @Entity()
 export default class User extends BaseEntity {
@@ -79,13 +79,11 @@ export default class User extends BaseEntity {
       .getOne();
   }
 
-  private static findUserById(id: number) {
-    return this.createQueryBuilder("user").where("user.id = :id", { id });
-  }
-
   //* user id 로 유저찾기
   static findById(id: number): Promise<User | undefined> {
-    return this.findUserById(id).getOne();
+    return this.createQueryBuilder("user")
+      .where("user.id = :id", { id })
+      .getOne();
   }
 
   //* user id 로 plants 찾기
@@ -99,7 +97,7 @@ export default class User extends BaseEntity {
   }
 
   //* user id 로 user 정보 수정 (되는지 안되는지 해봐야 함)
-  static modifyById(id: number, data: user) {
+  static modifyById(id: number, data: userType) {
     return this.createQueryBuilder()
       .update(User)
       .set(data)
