@@ -26,6 +26,7 @@ export default class Blacklist extends BaseEntity {
   @ManyToOne(
     (type) => User,
     (user) => user.blacklist,
+    { onDelete: "SET NULL", nullable: true },
   )
   user!: User;
 
