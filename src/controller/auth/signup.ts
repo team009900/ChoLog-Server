@@ -27,7 +27,6 @@ export default async (req: Request, res: Response) => {
       const hash = hashSync(password, 12);
 
       const newUser = User.createUser(id, email, username, hash);
-      console.log({ newUser });
 
       return res.status(201).json({
         id,
