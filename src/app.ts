@@ -49,8 +49,8 @@ app.get("/", (req: express.Request, res: express.Response) => {
 app.use("/auth", auth);
 app.use(
   "/diary",
-  isLoggedIn, // 2. 토큰이 있으면 블랙리스트 토큰인 지 확인
-  passport.authenticate("jwt", { session: false }), // 1. 토큰이 있는 자만 접근할 수 있는 미들웨어(토큰 유효기간도 같이 검사)
+  isLoggedIn, // 1. 토큰의 유무부터 확인 -> 있으면 블랙리스트 토큰인 지 확인
+  passport.authenticate("jwt", { session: false }), // 2. 토큰의 유효성 검사
   routes.diary,
 );
 app.use(
