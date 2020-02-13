@@ -107,6 +107,7 @@ export default class User extends BaseEntity {
       .execute();
   }
 
+  // * 회원가입 유저 생성
   static createUser(
     id: number,
     email: string,
