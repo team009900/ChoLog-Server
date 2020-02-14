@@ -6,28 +6,36 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  InsertResult,
 } from "typeorm";
 import API from "./API";
+import { plantsDatabaseType } from "../@types/entity";
+import PlantDataImg from "./PlantDataImg";
 
 @Entity()
 export default class PlantsDatabase extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column()
+  @Column({ unique: true })
   distributionName!: string; // 유통명
 
-  @Column()
+  @Column({ nullable: true })
   scientificName!: string; // 학명
 
-  @Column()
+  @Column({ nullable: true })
   englishName!: string;
 
   @Column()
-  detailImg!: string;
-
-  @Column()
   contentsNo!: number;
+
+  @OneToMany(
+    (type) => PlantDataImg,
+    (plantDataImg) => plantDataImg.plantData,
+    { nullable: true },
+  )
+  images!: PlantDataImg[];
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
@@ -38,6 +46,7 @@ export default class PlantsDatabase extends BaseEntity {
   @ManyToOne(
     (type) => API,
     (api) => api.plantsDataList,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   api!: API;
 
@@ -51,5 +60,24 @@ export default class PlantsDatabase extends BaseEntity {
         { target },
       )
       .getMany();
+  }
+
+  //* 데이터 입력
+  static async insertPlantData(
+    data: plantsDatabaseType,
+  ): Promise<InsertResult | false> {
+    //! 동일한 유통명을 가진 식물data가 있는지 확인
+    const findPlants = await this.find({
+      distributionName: data.distributionName,
+    });
+    if (findPlants.length !== 0) {
+      return false;
+    }
+
+    return this.createQueryBuilder()
+      .insert()
+      .into(PlantsDatabase)
+      .values(data)
+      .execute();
   }
 }
