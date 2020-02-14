@@ -48,11 +48,27 @@ app.get("/", (req: express.Request, res: express.Response) => {
 // Routes
 app.use("/auth", auth);
 // app.use("/user", passport.authenticate("jwt", { session: false }), user);
-app.use("/diary", routes.diary);
-app.use("/parameters", routes.parameters);
-app.use("/plant", routes.plant);
-app.use("/plantsdb", routes.plantsdb);
-app.use("/user", routes.user);
+app.use(
+  "/diary",
+  passport.authenticate("jwt", { session: false }),
+  routes.diary,
+);
+app.use(
+  "/parameters",
+  passport.authenticate("jwt", { session: false }),
+  routes.parameters,
+);
+app.use(
+  "/plant",
+  passport.authenticate("jwt", { session: false }),
+  routes.plant,
+);
+app.use(
+  "/plantsdb",
+  passport.authenticate("jwt", { session: false }),
+  routes.plantsdb,
+);
+app.use("/user", passport.authenticate("jwt", { session: false }), routes.user);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use(

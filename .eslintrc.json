@@ -19,7 +19,10 @@
     "no-console": 0,
     "no-unused-vars": 0,
     "quotes": ["error", "double"],
-    "object-curly-newline": ["error", { "multiline": true }],
+    "object-curly-newline": [
+      "error",
+      { "multiline": true, "consistent": true }
+    ],
     "import/extensions": [
       "error",
       "ignorePackages",

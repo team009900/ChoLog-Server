@@ -1,10 +1,11 @@
 yarn.lock
+package-lock.json
+
 .vscode/
 node_modules/
 build/
 tmp/
 temp/
-key.ts
-
+.http
 # dotenv environment variables file
 .env

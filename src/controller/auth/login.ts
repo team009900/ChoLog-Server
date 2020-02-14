@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as passport from "passport";
 import * as jwt from "jsonwebtoken";
+import "dotenv/config";
 // import * as jwtSecret from "../../../key";
 
 // passport.authenticate('local') 미들웨어가 로컬 로그인을 수행.
@@ -19,37 +20,47 @@ export default (req: Request, res: Response, next: NextFunction) => {
           // });
         }
 
-        req.login(user, { session: false }, async (loginError) => {
-          if (loginError) return next(loginError);
-          // if (loginError) {
-          //   res.status(400).send({ loginError });
-          // }
+        req.login(
+          user,
+          { session: false },
+          async (loginError): Promise<void | Response> => {
+            if (loginError) return next(loginError);
+            // if (loginError) {
+            //   res.status(400).send({ loginError });
+            // }
 
-          const token = jwt.sign(
-            {
-              id: user.id,
-              username: user.username,
-            },
-            "jwtSecret",
-            {
-              expiresIn: "1d",
-              issuer: "009900",
-            },
-          );
+            const jwtSecret = process.env.JWT_SECRET;
 
-          res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-          });
+            if (jwtSecret === undefined) {
+              return next(loginError);
+            }
 
-          // return res.status(200).json({
-          //   id: user.id,
-          //   username: user.username,
-          //   email: user.email,
-          // });
-          return res.status(200).json({ user, token });
-          // console.log({ user, token });
-        });
+            const token = jwt.sign(
+              {
+                id: user.id,
+                username: user.username,
+              },
+              jwtSecret,
+              {
+                expiresIn: "1d",
+                issuer: "009900",
+              },
+            );
+
+            // res.cookie("token", token, {
+            //   httpOnly: true,
+            //   secure: true,
+            // });
+
+            // return res.status(200).json({
+            //   id: user.id,
+            //   username: user.username,
+            //   email: user.email,
+            // });
+            return res.status(200).json({ user, token });
+            // console.log({ user, token });
+          },
+        );
       } catch (err) {
         res.status(400).send(err);
       }
