@@ -8,10 +8,12 @@ import {
   UpdateDateColumn,
   OneToMany,
   InsertResult,
+  OneToOne,
 } from "typeorm";
 import API from "./API";
 import { plantsDatabaseType } from "../@types/entity";
 import PlantDataImg from "./PlantDataImg";
+import PlantDetail from "./PlantDetail";
 
 @Entity()
 export default class PlantsDatabase extends BaseEntity {
@@ -36,6 +38,12 @@ export default class PlantsDatabase extends BaseEntity {
     { nullable: true },
   )
   images!: PlantDataImg[];
+
+  @OneToOne(
+    (type) => PlantDetail,
+    (plantDetail) => plantDetail.database,
+  )
+  detail!: PlantDetail;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
