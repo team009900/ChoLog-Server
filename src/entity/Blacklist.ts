@@ -30,9 +30,19 @@ export default class Blacklist extends BaseEntity {
   )
   user!: User;
 
+  // * 토큰으로 찾기
   static findByToken(token: string): Promise<Blacklist | undefined> {
     return this.createQueryBuilder("blacklist")
       .where("blacklist.token = :token", { token })
       .getOne();
+  }
+
+  // * 로그아웃 시 토큰 추가
+  static createToken(token: string) {
+    return this.createQueryBuilder()
+      .insert()
+      .into(Blacklist)
+      .values({ token })
+      .execute();
   }
 }

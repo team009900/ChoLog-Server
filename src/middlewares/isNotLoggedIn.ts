@@ -1,10 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
+import Blacklist from "../entity/Blacklist";
 
-export default (req: Request, res: Response, next: NextFunction): void => {
+export default async (req: Request, res: Response, next: NextFunction) => {
   if (!req.headers.authorization) {
     next();
-  } else {
-    res.status(403).send("로그인 되어 있음");
+  } else if (req.headers.authorization) {
+    const token = req.headers.authorization;
+    const blacklistToken = await Blacklist.findByToken(token);
+
+    try {
+      if (blacklistToken) {
+        next();
+        return;
+      }
+      res.status(403).json("이미 로그인 되어 있습니다."); // 토큰이 있지만 블랙리스트가 아닐 때
+    } catch (error) {
+      res.status(400).json(error);
+    }
   }
 };
