@@ -23,6 +23,11 @@
       "error",
       { "multiline": true, "consistent": true }
     ],
+    "operator-linebreak": [
+      "error",
+      "after",
+      { "overrides": { "?": "before", ":": "before" } }
+    ],
     "import/extensions": [
       "error",
       "ignorePackages",
