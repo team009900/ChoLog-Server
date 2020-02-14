@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import * as passport from "passport";
 import * as jwt from "jsonwebtoken";
 import "dotenv/config";
-// import * as jwtSecret from "../../../key";
 
 // passport.authenticate('local') 미들웨어가 로컬 로그인을 수행.
 export default (req: Request, res: Response, next: NextFunction) => {
