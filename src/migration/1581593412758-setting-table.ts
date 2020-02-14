@@ -1,16 +1,20 @@
 /* eslint-disable */
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class createTables1581573707938 implements MigrationInterface {
-  name = "createTables1581573707938";
+export class settingTable1581593412758 implements MigrationInterface {
+  name = "settingTable1581593412758";
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(
-      "CREATE TABLE `plants_database` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `distributionName` varchar(255) NOT NULL, `scientificName` varchar(255) NOT NULL, `englishName` varchar(255) NOT NULL, `detailImg` varchar(255) NOT NULL, `contentsNo` int NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `apiId` int UNSIGNED NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB",
+      "CREATE TABLE `plant_data_img` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `image` varchar(255) NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `plantDataId` int UNSIGNED NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB",
       undefined,
     );
     await queryRunner.query(
-      "CREATE TABLE `api` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `provider` varchar(255) NOT NULL, `url` varchar(255) NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB",
+      "CREATE TABLE `plants_database` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `distributionName` varchar(255) NOT NULL, `scientificName` varchar(255) NULL, `englishName` varchar(255) NULL, `contentsNo` int NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `apiId` int UNSIGNED NULL, UNIQUE INDEX `IDX_3a8677c0f33348a682293b5180` (`distributionName`), PRIMARY KEY (`id`)) ENGINE=InnoDB",
+      undefined,
+    );
+    await queryRunner.query(
+      "CREATE TABLE `api` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `provider` varchar(255) NOT NULL, `url` varchar(255) NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), UNIQUE INDEX `IDX_ad869ec886ceea61cc24452eea` (`provider`), PRIMARY KEY (`id`)) ENGINE=InnoDB",
       undefined,
     );
     await queryRunner.query(
@@ -18,7 +22,7 @@ export class createTables1581573707938 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      "CREATE TABLE `parameter` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `parameterName` varchar(255) NOT NULL, `type` tinyint NOT NULL DEFAULT 0, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB",
+      "CREATE TABLE `parameter` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `parameterName` varchar(255) NOT NULL, `type` tinyint NOT NULL DEFAULT 0, `color` varchar(255) NOT NULL, `description` varchar(255) NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), PRIMARY KEY (`id`)) ENGINE=InnoDB",
       undefined,
     );
     await queryRunner.query(
@@ -38,7 +42,7 @@ export class createTables1581573707938 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      "CREATE TABLE `blacklist` (`id` int NOT NULL AUTO_INCREMENT, `token` varchar(255) NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `userId` int NULL, UNIQUE INDEX `REL_53c1ab62c3e5875bc3ac474823` (`userId`), PRIMARY KEY (`id`)) ENGINE=InnoDB",
+      "CREATE TABLE `blacklist` (`id` int NOT NULL AUTO_INCREMENT, `token` varchar(255) NOT NULL, `created_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `updated_at` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `userId` int NULL, UNIQUE INDEX `IDX_491806708ff1601fd3ccb2e410` (`token`), PRIMARY KEY (`id`)) ENGINE=InnoDB",
       undefined,
     );
     await queryRunner.query(
@@ -54,27 +58,31 @@ export class createTables1581573707938 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `plants_database` ADD CONSTRAINT `FK_ff8568e2c7ffb4f72f73b5a15a6` FOREIGN KEY (`apiId`) REFERENCES `api`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `plant_data_img` ADD CONSTRAINT `FK_91db9716e0303017878f410ed0b` FOREIGN KEY (`plantDataId`) REFERENCES `plants_database`(`id`) ON DELETE CASCADE ON UPDATE CASCADE",
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `state` ADD CONSTRAINT `FK_edfbd1ac35fb860823c2af31bac` FOREIGN KEY (`parameterId`) REFERENCES `parameter`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `plants_database` ADD CONSTRAINT `FK_ff8568e2c7ffb4f72f73b5a15a6` FOREIGN KEY (`apiId`) REFERENCES `api`(`id`) ON DELETE CASCADE ON UPDATE CASCADE",
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `diary` ADD CONSTRAINT `FK_313fea908ef76b3ced62634223e` FOREIGN KEY (`plantId`) REFERENCES `plant`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `state` ADD CONSTRAINT `FK_edfbd1ac35fb860823c2af31bac` FOREIGN KEY (`parameterId`) REFERENCES `parameter`(`id`) ON DELETE CASCADE ON UPDATE CASCADE",
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `plant` ADD CONSTRAINT `FK_ab082df81848f48f1d1f64a9cf8` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `diary` ADD CONSTRAINT `FK_313fea908ef76b3ced62634223e` FOREIGN KEY (`plantId`) REFERENCES `plant`(`id`) ON DELETE CASCADE ON UPDATE CASCADE",
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `plant` ADD CONSTRAINT `FK_39448d16c354ed7b48779d18d5f` FOREIGN KEY (`familyId`) REFERENCES `family`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `plant` ADD CONSTRAINT `FK_ab082df81848f48f1d1f64a9cf8` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE",
       undefined,
     );
     await queryRunner.query(
-      "ALTER TABLE `blacklist` ADD CONSTRAINT `FK_53c1ab62c3e5875bc3ac474823e` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION",
+      "ALTER TABLE `plant` ADD CONSTRAINT `FK_39448d16c354ed7b48779d18d5f` FOREIGN KEY (`familyId`) REFERENCES `family`(`id`) ON DELETE SET NULL ON UPDATE CASCADE",
+      undefined,
+    );
+    await queryRunner.query(
+      "ALTER TABLE `blacklist` ADD CONSTRAINT `FK_53c1ab62c3e5875bc3ac474823e` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION",
       undefined,
     );
     await queryRunner.query(
@@ -153,6 +161,10 @@ export class createTables1581573707938 implements MigrationInterface {
       undefined,
     );
     await queryRunner.query(
+      "ALTER TABLE `plant_data_img` DROP FOREIGN KEY `FK_91db9716e0303017878f410ed0b`",
+      undefined,
+    );
+    await queryRunner.query(
       "DROP INDEX `IDX_1867d7b94efcf02ed2c0bd183f` ON `friends`",
       undefined,
     );
@@ -180,7 +192,7 @@ export class createTables1581573707938 implements MigrationInterface {
     );
     await queryRunner.query("DROP TABLE `diary_state`", undefined);
     await queryRunner.query(
-      "DROP INDEX `REL_53c1ab62c3e5875bc3ac474823` ON `blacklist`",
+      "DROP INDEX `IDX_491806708ff1601fd3ccb2e410` ON `blacklist`",
       undefined,
     );
     await queryRunner.query("DROP TABLE `blacklist`", undefined);
@@ -202,7 +214,16 @@ export class createTables1581573707938 implements MigrationInterface {
     await queryRunner.query("DROP TABLE `state`", undefined);
     await queryRunner.query("DROP TABLE `parameter`", undefined);
     await queryRunner.query("DROP TABLE `family`", undefined);
+    await queryRunner.query(
+      "DROP INDEX `IDX_ad869ec886ceea61cc24452eea` ON `api`",
+      undefined,
+    );
     await queryRunner.query("DROP TABLE `api`", undefined);
+    await queryRunner.query(
+      "DROP INDEX `IDX_3a8677c0f33348a682293b5180` ON `plants_database`",
+      undefined,
+    );
     await queryRunner.query("DROP TABLE `plants_database`", undefined);
+    await queryRunner.query("DROP TABLE `plant_data_img`", undefined);
   }
 }

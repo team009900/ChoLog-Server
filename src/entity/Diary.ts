@@ -44,6 +44,7 @@ export default class Diary extends BaseEntity {
   @ManyToOne(
     (type) => Plant,
     (plant) => plant.diaries,
+    { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   plant!: Plant;
 

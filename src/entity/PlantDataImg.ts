@@ -2,20 +2,21 @@ import {
   Entity,
   BaseEntity,
   PrimaryGeneratedColumn,
-  ManyToOne,
   Column,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  InsertResult,
 } from "typeorm";
-import Parameter from "./Parameter";
+import PlantsDatabase from "./PlantsDatabase";
 
 @Entity()
-export default class State extends BaseEntity {
+export default class PlantDataImg extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column({ type: "tinyint" })
-  level!: number;
+  @Column()
+  image!: string;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
@@ -24,9 +25,17 @@ export default class State extends BaseEntity {
   public updatedAt!: Date;
 
   @ManyToOne(
-    (type) => Parameter,
-    (parameter) => parameter.states,
+    (type) => PlantsDatabase,
+    (plantData) => plantData.images,
     { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
-  parameter!: Parameter;
+  plantData!: PlantsDatabase;
+
+  static insertPlantDataImg(image: string): Promise<InsertResult> {
+    return this.createQueryBuilder()
+      .insert()
+      .into(PlantDataImg)
+      .values({ image })
+      .execute();
+  }
 }

@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  InsertResult,
 } from "typeorm";
 import PlantsDatabase from "./PlantsDatabase";
 
@@ -14,7 +15,7 @@ export default class API extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column()
+  @Column({ unique: true })
   provider!: string;
 
   @Column()
@@ -31,4 +32,27 @@ export default class API extends BaseEntity {
     (plantsDatabase) => plantsDatabase.api,
   )
   plantsDataList!: PlantsDatabase[];
+
+  //* provider로 검색
+  static findByProvider(provider: string): Promise<API | undefined> {
+    return this.createQueryBuilder("api")
+      .where("api.provider = :provider", { provider })
+      .getOne();
+  }
+
+  static async insertAPI(
+    provider: string,
+    url: string,
+  ): Promise<InsertResult | false> {
+    const findOne = await this.findByProvider(provider);
+    if (findOne) {
+      return false;
+    }
+
+    return this.createQueryBuilder()
+      .insert()
+      .into(API)
+      .values({ provider, url })
+      .execute();
+  }
 }
