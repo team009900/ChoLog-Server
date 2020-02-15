@@ -9,6 +9,7 @@ import {
   OneToMany,
   InsertResult,
   OneToOne,
+  JoinColumn,
 } from "typeorm";
 import API from "./API";
 import { plantsDatabaseType } from "../@types/entity";
@@ -20,10 +21,10 @@ export default class PlantsDatabase extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column({ unique: true })
+  @Column()
   distributionName!: string; // 유통명
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   scientificName!: string; // 학명
 
   @Column({ nullable: true })
@@ -39,10 +40,8 @@ export default class PlantsDatabase extends BaseEntity {
   )
   images!: PlantDataImg[];
 
-  @OneToOne(
-    (type) => PlantDetail,
-    (plantDetail) => plantDetail.database,
-  )
+  @OneToOne((type) => PlantDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @JoinColumn()
   detail!: PlantDetail;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
@@ -59,9 +58,7 @@ export default class PlantsDatabase extends BaseEntity {
   api!: API;
 
   //* 검색
-  static findPlantsDataList(
-    target: string,
-  ): Promise<PlantsDatabase[] | undefined> {
+  static findPlantsDataList(target: string): Promise<PlantsDatabase[] | undefined> {
     return this.createQueryBuilder("plants_database")
       .where(
         "distributionName = %:target% OR scientificName = %:target% OR englishName = %:target%",
@@ -71,21 +68,24 @@ export default class PlantsDatabase extends BaseEntity {
   }
 
   //* 데이터 입력
-  static async insertPlantData(
-    data: plantsDatabaseType,
-  ): Promise<InsertResult | false> {
-    //! 동일한 유통명을 가진 식물data가 있는지 확인
-    const findPlants = await this.find({
-      distributionName: data.distributionName,
-    });
-    if (findPlants.length !== 0) {
-      return false;
+  static async insertPlantData(data: plantsDatabaseType): Promise<PlantsDatabase | undefined> {
+    const { scientificName } = data;
+    if (scientificName) {
+      //! 동일한 학명을 가진 식물data가 있는지 확인
+      const findPlant = await this.findOne({ scientificName });
+      if (findPlant) {
+        return findPlant;
+      }
     }
 
-    return this.createQueryBuilder()
-      .insert()
-      .into(PlantsDatabase)
-      .values(data)
-      .execute();
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(PlantsDatabase)
+        .values(data)
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
   }
 }
