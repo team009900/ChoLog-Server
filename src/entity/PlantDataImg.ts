@@ -15,7 +15,7 @@ export default class PlantDataImg extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column()
+  @Column({ unique: true })
   image!: string;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
@@ -31,9 +31,13 @@ export default class PlantDataImg extends BaseEntity {
   )
   plantData!: PlantsDatabase;
 
-  static async insertPlantImg(
-    image: string,
-  ): Promise<PlantDataImg | undefined> {
+  static async insertPlantImg(image: string): Promise<PlantDataImg | undefined> {
+    //! 동일한 이미지가 있는지 확인
+    const findImg = await this.findOne({ image });
+    if (findImg) {
+      return findImg;
+    }
+
     const { id } = (
       await this.createQueryBuilder()
         .insert()
