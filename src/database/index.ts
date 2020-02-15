@@ -4,6 +4,35 @@ import { parseString } from "xml2js";
 import "dotenv/config";
 import API from "../entity/API";
 import { plantsDatabaseType, apiType } from "../@types/entity";
+import PlantsDatabase from "../entity/PlantsDatabase";
+import PlantDataImg from "../entity/PlantDataImg";
+
+const makeXmlToStr = (body: string): Promise<any> => {
+  const strPromise: Promise<any> = new Promise((resolve, reject) => {
+    parseString(body, (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+  return strPromise;
+};
+
+const requestGetBody = (url: string, key: string): Promise<any> => {
+  const requestAns: Promise<any> = new Promise((resolve, reject) => {
+    request(url, async (error: any, response: request.Response, body: any) => {
+      console.log(`--- url: ${url.split(key).join("***")}`);
+      console.log("error:", error);
+      console.log("statusCode:", response && response.statusCode);
+      if (error) {
+        reject(error);
+      }
+      // XML을 배열로 바꿈
+      const xmlToStr = await makeXmlToStr(body);
+      resolve(xmlToStr);
+    });
+  });
+  return requestAns;
+};
 
 const settingPlantData = async (api: apiType): Promise<true | false> => {
   const { provider } = api;
@@ -14,30 +43,12 @@ const settingPlantData = async (api: apiType): Promise<true | false> => {
   }
 
   if (provider === "garden" || provider === "dryGarden") {
-    const nongsaroKey = process.env.NONGSARO_KEY; // 농사로API 사용
+    const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : ""; // 농사로API 사용
     url = `${url}/${provider}List?apiKey=${nongsaroKey}`;
 
     //! 요청을 한번에 받아오기 위해 목록의 갯수를 받아옴
-    const totalCount = await new Promise(
-      (resolve: (resolve: any) => any, reject: (reject: any) => any): void => {
-        // 외부 API에 요청을 보냄
-        request(
-          `${url}&numOfRows=0`,
-          (error: any, response: request.Response, body: any) => {
-            console.log("error:", error);
-            console.log("statusCode:", response && response.statusCode);
-            if (error) {
-              reject(error);
-            }
-            // XML을 배열로 바꿈
-            parseString(body, (err, result) => {
-              // console.log(result.response);
-              resolve(result.response.body[0].items[0].totalCount[0]);
-            });
-          },
-        );
-      },
-    );
+    let responseOfUrl = await requestGetBody(`${url}&numOfRows=0`, nongsaroKey);
+    const totalCount = responseOfUrl.response.body[0].items[0].totalCount[0];
     // console.log({ totalCount });
 
     //! garden와 dryGarden의 응답변수가 다르기 때문에 필요한 응답변수를 parameter에 저장함
@@ -57,56 +68,51 @@ const settingPlantData = async (api: apiType): Promise<true | false> => {
     }
 
     //! 유통명과 contents number를 한번에 받아오기 위한 API요청
-    const getList = await new Promise(
-      (resolve: (resolve: any) => any, reject: (reject: any) => any): void => {
-        // console.log("------parameter:\n", parameter);
+    responseOfUrl = await requestGetBody(`${url}&numOfRows=${totalCount}`, nongsaroKey);
 
-        // 외부 API에 요청을 보냄
-        request(
-          `${url}&numOfRows=${totalCount}`,
-          (error: any, response: request.Response, body: any): void => {
-            console.log("error:", error);
-            console.log("statusCode:", response && response.statusCode);
-            if (error) {
-              reject(error);
-            }
-            // XML을 배열로 바꿈
-            parseString(body, (err, result) => {
-              if (err) {
-                reject(err);
-              }
+    //* list 받아오기
+    const apiItemList = responseOfUrl.response.body[0].items[0].item;
+    const getList: plantsDatabaseType[] = apiItemList.map(
+      (item: any): plantsDatabaseType => {
+        const distributionName: string = item[parameter.distributionName][0];
+        const contentsNo: number = Number(item[parameter.contentsNo][0]);
+        let tmpImages: string[] = [];
+        if (provider === "garden") {
+          tmpImages = item[parameter.image][0]
+            .split("|")
+            .map((img: string): string => parameter.imgUrl + img);
+        } else if (provider === "dryGarden") {
+          tmpImages.push(item[`${parameter.image}1`][0]);
+          if (item[`${parameter.image}2`][0].length) {
+            tmpImages.push(item[`${parameter.image}2`][0]);
+          }
+        }
 
-              //* list 받아오기
-              const apiItemList = result.response.body[0].items[0].item;
-              const itemList: plantsDatabaseType[] = apiItemList.map(
-                (item: any): plantsDatabaseType => {
-                  const distributionName: string =
-                    item[parameter.distributionName][0];
-                  const contentsNo: number = Number(
-                    item[parameter.contentsNo][0],
-                  );
-                  let tmpImages: string[] = [];
-                  if (provider === "garden") {
-                    tmpImages = item[parameter.image][0]
-                      .split("|")
-                      .map((img: string): string => parameter.imgUrl + img);
-                  } else if (provider === "dryGarden") {
-                    tmpImages.push(item[`${parameter.image}1`][0]);
-                    if (item[`${parameter.image}2`][0].length) {
-                      tmpImages.push(item[`${parameter.image}2`][0]);
-                    }
-                  }
-
-                  return { distributionName, tmpImages, contentsNo };
-                },
-              );
-              resolve(itemList);
-            });
-          },
-        );
+        return { distributionName, tmpImages, contentsNo };
       },
     );
-    // console.log("------getList\n", getList);
+
+    // console.log("=====getList\n", getList);
+
+    //! getList로 받아온 식물리스트들을 토대로 PlantsDatabase, PlantDataImg, PlantDetail엔티티 추가
+    /*
+    const plantsDBPromises: Promise<any>[] = getList.map(async (plantData: plantsDatabaseType) => {
+      let plantImgs: (PlantDataImg | undefined)[];
+      if (plantData.tmpImages !== undefined) {
+        plantImgs = await Promise.all(
+          plantData.tmpImages.map((img: string) => PlantDataImg.insertPlantImg(img)),
+        );
+
+        // for (let i = 0; i < plantData.tmpImages.length; i++) {
+        //   const img: string = plantData.tmpImages[i];
+        //   const plantImg = await PlantDataImg.insertPlantImg(img);
+        //   plantImgs.push(plantImg);
+        // }
+      }
+    });
+
+    const plantsDatabases: PlantsDatabase[] = await Promise.all(plantsDBPromises);
+    */
   }
 
   return true;
@@ -125,19 +131,7 @@ createConnection().then(async () => {
     },
   ];
 
-  const tmp = await Promise.all(
-    apis.map(
-      (val: apiType): Promise<any> => API.insertAPI(val.provider, val.url),
-    ),
-  );
-  console.log(
-    "generatedMaps:",
-    tmp[0].generatedMaps,
-    "\nidentifiers:",
-    tmp[0].identifiers,
-    "\nraw:",
-    tmp[0].raw,
-  );
+  await Promise.all(apis.map((val: apiType): Promise<any> => API.insertAPI(val.provider, val.url)));
 
   await settingPlantData(apis[0]);
 });
