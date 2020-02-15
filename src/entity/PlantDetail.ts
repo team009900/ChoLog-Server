@@ -27,16 +27,7 @@ export default class PlantDetail extends BaseEntity {
   @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
-  @OneToOne(
-    (type) => PlantsDatabase,
-    (plantsDatabase) => plantsDatabase.detail,
-  )
-  database!: PlantsDatabase;
-
-  static insertPlantDetail(
-    contents: string,
-    type: string,
-  ): Promise<InsertResult> {
+  static insertPlantDetail(contents: string, type: string): Promise<InsertResult> {
     return this.createQueryBuilder()
       .insert()
       .into(PlantDetail)
