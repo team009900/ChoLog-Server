@@ -31,11 +31,17 @@ export default class PlantDataImg extends BaseEntity {
   )
   plantData!: PlantsDatabase;
 
-  static insertPlantDataImg(image: string): Promise<InsertResult> {
-    return this.createQueryBuilder()
-      .insert()
-      .into(PlantDataImg)
-      .values({ image })
-      .execute();
+  static async insertPlantImg(
+    image: string,
+  ): Promise<PlantDataImg | undefined> {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(PlantDataImg)
+        .values({ image })
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
   }
 }
