@@ -34,7 +34,7 @@ const requestGetBody = (url: string, key: string): Promise<any> => {
   return requestAns;
 };
 
-const settingPlantData = async (api: apiType): Promise<true | false> => {
+const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
   const { provider } = api;
   let { url } = api;
   const oneOfApi: API | undefined = await API.findByProvider(provider);
@@ -55,8 +55,9 @@ const settingPlantData = async (api: apiType): Promise<true | false> => {
     const parameter = {
       distributionName: "cntntsSj",
       contentsNo: "cntntsNo",
-      image: "string",
+      image: "",
       imgUrl: "http://www.nongsaro.go.kr/cms_contents",
+      scientificName: "",
     };
 
     if (provider === "garden") {
@@ -65,6 +66,7 @@ const settingPlantData = async (api: apiType): Promise<true | false> => {
     } else if (provider === "dryGarden") {
       parameter.image = "imgUrl"; // imgUrl1과 imgUrl2가 있음
       parameter.imgUrl = ""; // image url이 필요없음
+      parameter.scientificName = "scnm";
     }
 
     //! 유통명과 contents number를 한번에 받아오기 위한 API요청
@@ -74,47 +76,81 @@ const settingPlantData = async (api: apiType): Promise<true | false> => {
     const apiItemList = responseOfUrl.response.body[0].items[0].item;
     const getList: plantsDatabaseType[] = apiItemList.map(
       (item: any): plantsDatabaseType => {
+        //* 유통명 저장
         const distributionName: string = item[parameter.distributionName][0];
+
+        //* 컨텐츠 번호 저장
         const contentsNo: number = Number(item[parameter.contentsNo][0]);
+
         let tmpImages: string[] = [];
+        //! provider가 garden인 경우
         if (provider === "garden") {
+          //* 이미지 저장
           tmpImages = item[parameter.image][0]
             .split("|")
             .map((img: string): string => parameter.imgUrl + img);
-        } else if (provider === "dryGarden") {
-          tmpImages.push(item[`${parameter.image}1`][0]);
-          if (item[`${parameter.image}2`][0].length) {
-            tmpImages.push(item[`${parameter.image}2`][0]);
-          }
+
+          return { distributionName, tmpImages, contentsNo };
         }
 
-        return { distributionName, tmpImages, contentsNo };
+        //! provider가 dryGarden인 경우
+        //* 이미지 저장
+        tmpImages.push(item[`${parameter.image}1`][0]);
+        if (item[`${parameter.image}2`][0].length) {
+          tmpImages.push(item[`${parameter.image}2`][0]);
+        }
+
+        //* 학명 저장
+        const scientificName: string = item[parameter.scientificName][0]
+          .split("<i>")
+          .join("")
+          .split("</i>")
+          .join("");
+        return { distributionName, scientificName, tmpImages, contentsNo };
       },
     );
-
     // console.log("=====getList\n", getList);
 
     //! getList로 받아온 식물리스트들을 토대로 PlantsDatabase, PlantDataImg, PlantDetail엔티티 추가
-    /*
-    const plantsDBPromises: Promise<any>[] = getList.map(async (plantData: plantsDatabaseType) => {
-      let plantImgs: (PlantDataImg | undefined)[];
-      if (plantData.tmpImages !== undefined) {
-        plantImgs = await Promise.all(
-          plantData.tmpImages.map((img: string) => PlantDataImg.insertPlantImg(img)),
+    const plantsDBPromises: Promise<any>[] = getList.map(
+      async (plantData: plantsDatabaseType): Promise<PlantsDatabase | undefined> => {
+        //* PlantDatabase 생성
+        const newPlantDatabase: PlantsDatabase | undefined = await PlantsDatabase.insertPlantData(
+          plantData,
         );
+        if (newPlantDatabase === undefined) {
+          console.log(`newPlantDatabase: ${newPlantDatabase}`);
+          return undefined;
+        }
+        newPlantDatabase.images = newPlantDatabase.images ? newPlantDatabase.images : [];
 
-        // for (let i = 0; i < plantData.tmpImages.length; i++) {
-        //   const img: string = plantData.tmpImages[i];
-        //   const plantImg = await PlantDataImg.insertPlantImg(img);
-        //   plantImgs.push(plantImg);
-        // }
-      }
-    });
+        let plantImgs: (PlantDataImg | undefined)[] = [];
+        if (plantData.tmpImages !== undefined) {
+          //* PlantDataImg에 이미지 추가 후 생성 된 PlantDataImg들 받아옴
+          plantImgs = await Promise.all(
+            plantData.tmpImages.map((img: string) => PlantDataImg.insertPlantImg(img)),
+          );
+          // console.log(plantImgs);
+        }
 
-    const plantsDatabases: PlantsDatabase[] = await Promise.all(plantsDBPromises);
-    */
+        //* 생성된 PlantDatabase의 images에 PlantDataImg 추가
+        plantImgs.forEach((value: PlantDataImg | undefined): void => {
+          if (value === undefined) return;
+          newPlantDatabase.images.push(value);
+        });
+
+        //* 생성된 PlantDatabase에 api추가
+        newPlantDatabase.api = oneOfApi;
+
+        await newPlantDatabase.save();
+        // console.log(newPlantDatabase);
+        return newPlantDatabase;
+      },
+    );
+    await Promise.all(plantsDBPromises);
   }
 
+  console.log("++++++++ complete ++++++++");
   return true;
 };
 
@@ -133,5 +169,14 @@ createConnection().then(async () => {
 
   await Promise.all(apis.map((val: apiType): Promise<any> => API.insertAPI(val.provider, val.url)));
 
-  await settingPlantData(apis[0]);
+  const result = [];
+  result.push(await settingBasicPlantData(apis[0]));
+  result.push(await settingBasicPlantData(apis[1]));
+  // const result = await Promise.all(
+  //   apis.map(async (api) => {
+  //     const apiResult = await settingPlantData(api);
+  //     return apiResult;
+  //   }),
+  // );
+  console.log("result of setting basic plant data: ", result);
 });
