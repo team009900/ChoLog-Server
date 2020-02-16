@@ -17,14 +17,20 @@ const makeXmlToStr = (body: string): Promise<any> => {
   return strPromise;
 };
 
-const requestGetBody = (url: string, key: string): Promise<any> => {
+const requestGetBody = (url: string, key: string, log: boolean = true): Promise<any> => {
   const requestAns: Promise<any> = new Promise((resolve, reject) => {
     request(url, async (error: any, response: request.Response, body: any) => {
-      console.log(`--- url: ${url.split(key).join("***")}`);
-      console.log("error:", error);
-      console.log("statusCode:", response && response.statusCode);
+      const statusCode: number = response && response.statusCode;
+      if (log) {
+        console.log(`--- url: ${url.split(key).join("***")}`);
+        console.log("error:", error);
+        console.log("statusCode:", response && response.statusCode);
+      }
       if (error) {
         reject(error);
+      }
+      if (statusCode.toString()[0] !== "2") {
+        reject(new Error(`statusCode: ${statusCode}`));
       }
       // XML을 배열로 바꿈
       const xmlToStr = await makeXmlToStr(body);
@@ -111,7 +117,7 @@ const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
     );
     // console.log("=====getList\n", getList);
 
-    //! getList로 받아온 식물리스트들을 토대로 PlantsDatabase, PlantDataImg, PlantDetail엔티티 추가
+    //! getList로 받아온 식물리스트들을 토대로 PlantsDatabase, PlantDataImg 엔티티 추가
     const plantsDBPromises: Promise<any>[] = getList.map(
       async (plantData: plantsDatabaseType): Promise<PlantsDatabase | undefined> => {
         //* PlantDatabase 생성
@@ -150,7 +156,54 @@ const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
     await Promise.all(plantsDBPromises);
   }
 
-  console.log("++++++++ complete ++++++++");
+  console.log("++++++++ settingBasicPlantData complete ++++++++");
+  return true;
+};
+
+const settingDetailPlantData = async (): Promise<true | false> => {
+  const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : "";
+  const getAll: PlantsDatabase[] = await PlantsDatabase.find({
+    where: { detail: null },
+    relations: ["api"],
+  });
+  console.log(`** getAll.length: ${getAll.length}`);
+
+  const getAllPromise = await Promise.all(
+    getAll.map(async (value: PlantsDatabase, index: number) => {
+      const plantData = value;
+      // console.log(plantData);
+      const { api, contentsNo } = plantData;
+
+      const url = `${api.url}/${api.provider}Dtl?apiKey=${nongsaroKey}&cntntsNo=${contentsNo}`;
+
+      //! 농사로에 API요청 후 데이터 가공(사용하기 편하게)
+      const detailData = (await requestGetBody(url, nongsaroKey)).response.body[0].item[0];
+      const detailDataKeys = Object.keys(detailData);
+      for (let i = 0; i < detailDataKeys.length; i += 1) {
+        const key = detailDataKeys[i];
+        const detailValue = detailData[key][0];
+        detailData[key] = detailValue;
+      }
+      // console.log(detailData);
+
+      if (api.provider === "garden") {
+        plantData.scientificName = detailData.plntbneNm;
+        plantData.englishName = detailData.plntzrNm;
+      } else if (api.provider === "dryGarden") {
+        plantData.englishName = detailData.plntzrNm;
+      }
+
+      await plantData.save();
+
+      if (index % 50 === 0) {
+        await setTimeout(() => console.log("=====", index), 1000);
+      }
+    }),
+  );
+
+  // await Promise.all(getAllPromise);
+
+  console.log("++++++++ settingDetailPlantData complete ++++++++");
   return true;
 };
 
@@ -169,14 +222,11 @@ createConnection().then(async () => {
 
   await Promise.all(apis.map((val: apiType): Promise<any> => API.insertAPI(val.provider, val.url)));
 
-  const result = [];
-  result.push(await settingBasicPlantData(apis[0]));
-  result.push(await settingBasicPlantData(apis[1]));
-  // const result = await Promise.all(
-  //   apis.map(async (api) => {
-  //     const apiResult = await settingPlantData(api);
-  //     return apiResult;
-  //   }),
-  // );
+  let result: any = [];
+  // result.push(await settingBasicPlantData(apis[0]));
+  // result.push(await settingBasicPlantData(apis[1]));
   console.log("result of setting basic plant data: ", result);
+
+  result = await settingDetailPlantData();
+  console.log("result of setting detail plant data: ", result);
 });
