@@ -44,18 +44,18 @@ export default class PlantsDatabase extends BaseEntity {
   @JoinColumn()
   detail!: PlantDetail;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamp" })
-  public createdAt!: Date;
-
-  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
-  public updatedAt!: Date;
-
   @ManyToOne(
     (type) => API,
     (api) => api.plantsDataList,
     { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   api!: API;
+
+  @CreateDateColumn({ name: "created_at", type: "timestamp" })
+  public createdAt!: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
+  public updatedAt!: Date;
 
   //* 검색
   static findPlantsDataList(target: string): Promise<PlantsDatabase[] | undefined> {
@@ -69,10 +69,16 @@ export default class PlantsDatabase extends BaseEntity {
 
   //* 데이터 입력
   static async insertPlantData(data: plantsDatabaseType): Promise<PlantsDatabase | undefined> {
-    const { scientificName } = data;
+    const { scientificName, contentsNo } = data;
+    //! 동일한 contentsNo를 가진 식물data가 있는지 확인
+    let findPlant = await this.findOne({ contentsNo });
+    if (findPlant) {
+      return findPlant;
+    }
+
     if (scientificName) {
       //! 동일한 학명을 가진 식물data가 있는지 확인
-      const findPlant = await this.findOne({ scientificName });
+      findPlant = await this.findOne({ scientificName });
       if (findPlant) {
         return findPlant;
       }
