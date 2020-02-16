@@ -3,7 +3,6 @@ import {
   BaseEntity,
   PrimaryGeneratedColumn,
   Column,
-  InsertResult,
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -26,11 +25,20 @@ export default class PlantDetail extends BaseEntity {
   @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
-  static insertPlantDetail(contents: string, type: string): Promise<InsertResult> {
-    return this.createQueryBuilder()
-      .insert()
-      .into(PlantDetail)
-      .values({ contents, type })
-      .execute();
+  static async insertPlantDetail(contents: string, type: string): Promise<PlantDetail | undefined> {
+    const findPlant = await this.findOne({ contents });
+    if (findPlant) {
+      return findPlant;
+    }
+
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(PlantDetail)
+        .values({ contents, type })
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
   }
 }
