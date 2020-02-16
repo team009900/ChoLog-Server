@@ -13,4 +13,8 @@ const remove = (req: Request, res: Response, next: NextFunction): void => {
   res.json("user delete");
 };
 
-export { get, patch, remove as delete };
+const plantGet = (req: Request, res: Response, next: NextFunction): void => {
+  res.json("User's plants get.");
+};
+
+export { get, plantGet, patch, remove as delete };

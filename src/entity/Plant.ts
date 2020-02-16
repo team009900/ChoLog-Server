@@ -93,4 +93,35 @@ export default class Plant extends BaseEntity {
     }
     return plant.diaries;
   }
+
+  // // * 새 식물 추가
+  // static createPlant(
+  //   id: number,
+  //   mainImage: string,
+  //   nickname: string,
+  //   plantName: string,
+  //   scientificName: string,
+  //   adoptionDate: Date,
+  //   deathDate: Date,
+  //   memo: string,
+  //   advice: string,
+  //   openAllow: number,
+  // ) {
+  //   return this.createQueryBuilder()
+  //     .insert()
+  //     .into(Plant)
+  //     .values({
+  //       id,
+  //       mainImage,
+  //       nickname,
+  //       plantName,
+  //       scientificName,
+  //       adoptionDate,
+  //       deathDate,
+  //       memo,
+  //       advice,
+  //       openAllow,
+  //     })
+  //     .execute();
+  // }
 }
