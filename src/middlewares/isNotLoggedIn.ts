@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import * as passport from "passport";
 import * as jwt from "jsonwebtoken";
 import Blacklist from "../entity/Blacklist";
 import "dotenv/config";

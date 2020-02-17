@@ -5,7 +5,7 @@ import User from "../../entity/User";
 import { plant } from "../parameters";
 
 // * 새 식물 생성 /plant
-const post = async (req: Request, res: Response, next: NextFunction) => {
+const post = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   console.log("식물생서어엉~");
   const {
     email,
@@ -59,7 +59,7 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
 
     const body = {
       id: newPlant.id,
-      mainImage: newPlant.image,
+      image: newPlant.image,
       nickname: newPlant.nickname,
       plantName: newPlant.plantName,
       scientificName: newPlant.scientificName,
@@ -88,9 +88,64 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 // * 식물 정보 갖고오기 /plant/:plantId
-const get = (req: Request, res: Response, next: NextFunction): void => {
+const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { plantId } = req.params;
-  res.json(`plant get. plantId: ${plantId}`);
+  try {
+    const findPlant = await Plant.findOne({
+      where: { id: plantId },
+      relations: ["user", "family"],
+    });
+
+    if (findPlant === undefined) {
+      res.status(404).json(`Plant ${plantId} does not exist`);
+      return;
+    }
+
+    const {
+      id,
+      image,
+      nickname,
+      plantName,
+      scientificName,
+      adoptionDate,
+      deathDate,
+      memo,
+      advice,
+      openAllow,
+      user,
+      family,
+    } = findPlant;
+
+    const body = {
+      id,
+      image,
+      nickname,
+      plantName,
+      scientificName,
+      adoptionDate,
+      deathDate,
+      memo,
+      advice,
+      openAllow,
+      user: {
+        id: user.id,
+        username: user.username,
+      },
+      family: {},
+    };
+
+    if (family) {
+      body.family = {
+        id: family.id,
+        familyName: family.familyName,
+      };
+    }
+
+    res.status(200).json(body);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(`Error: ${error}`);
+  }
 };
 
 // * 식물 정보 수정 /plant/:plantId
@@ -105,7 +160,7 @@ const remove = (req: Request, res: Response, next: NextFunction): void => {
   res.json(`plant delete. plantId: ${plantId}`);
 };
 
-// * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=diaryId&month=month
+// * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=plantId&month=month
 const diaryGet = (req: Request, res: Response, next: NextFunction): void => {
   const { month } = req.params;
   res.json(`Diary get. This month is ${month}`);

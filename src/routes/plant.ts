@@ -15,4 +15,7 @@ router.patch("/:plantId", plantController.patch);
 //* DELETE /plant/:plantId
 router.delete("/:plantId", plantController.delete);
 
+//* getDiary /plant/diaries?id=plantId&month=month
+router.get("/diaries", plantController.diaryGet);
+
 export default router;
