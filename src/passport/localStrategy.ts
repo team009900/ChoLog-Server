@@ -40,7 +40,7 @@ passport.use(
         if (exUser) {
           const result = compareSync(password, exUser.password); // 있다면 bcrypt의 compare함수로 비밀번호를 비교한다.
           if (result) {
-            console.log({ exUser });
+            // console.log({ exUser });
             done(null, exUser, { message: "성공적으로 로그인 했습니다." }); // 비밀번호까지 일치한다면 done 함수의 두 번째 인자로 사용자 정보를 넣어 보낸다.
           } else {
             done(null, false, { message: "비밀번호가 일치하지 않습니다." });

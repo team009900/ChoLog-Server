@@ -113,16 +113,11 @@ export default class User extends BaseEntity {
   }
 
   // * 회원가입 유저 생성
-  static createUser(
-    id: number,
-    email: string,
-    username: string,
-    password: string,
-  ) {
+  static createUser(email: string, username: string, password: string) {
     return this.createQueryBuilder()
       .insert()
       .into(User)
-      .values({ id, email, username, password })
+      .values({ email, username, password })
       .execute();
   }
 }
