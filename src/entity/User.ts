@@ -80,7 +80,7 @@ export default class User extends BaseEntity {
 
   //* Email로 유저찾는 메서드
   static findByEmail(email: string): Promise<User | undefined> {
-    console.log({ email });
+    // console.log({ email });
     return this.createQueryBuilder("user")
       .where("user.email = :email", { email })
       .getOne();
@@ -113,16 +113,15 @@ export default class User extends BaseEntity {
   }
 
   // * 회원가입 유저 생성
-  static createUser(
-    id: number,
-    email: string,
-    username: string,
-    password: string,
-  ) {
-    return this.createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({ id, email, username, password })
-      .execute();
+  static async createUser(email: string, username: string, password: string) {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(User)
+        .values({ email, username, password })
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
   }
 }
