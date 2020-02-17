@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import Plant from "../../entity/Plant";
 import Family from "../../entity/Family";
 import User from "../../entity/User";
+import { plant } from "../parameters";
 
 // * 새 식물 생성 /plant
 const post = async (req: Request, res: Response, next: NextFunction) => {
   console.log("식물생서어엉~");
   const {
-    id,
     email,
     mainImage,
     nickname,
@@ -18,33 +18,21 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
     memo,
     advice,
     openAllow,
+    familyName,
   } = req.body;
 
-  const user = await User.findByEmail(email);
+  try {
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(400).json("존재하지 않는 유저입니다.");
+    }
 
-  if (!user) {
-    return res.status(400).json("존재하지 않는 유저입니다.");
-  }
-  await User.save(user);
-  // const familyName = Family.find({ select: ["familyName"] });
+    let family; // familyName이 없을 수도 있기 때문에 밖에서 선언
+    if (familyName) {
+      family = await Family.findOrCreateFamily(familyName); // familyName이 있으면 찾고, 찾아도 없으면 생성해준다.
+    }
 
-  const newPlant = new Plant();
-  newPlant.id = id;
-  newPlant.mainImage = mainImage;
-  newPlant.nickname = nickname;
-  newPlant.plantName = plantName;
-  newPlant.scientificName = scientificName;
-  newPlant.adoptionDate = adoptionDate;
-  newPlant.deathDate = deathDate;
-  newPlant.memo = memo;
-  newPlant.advice = advice;
-  newPlant.openAllow = openAllow;
-  newPlant.user = user;
-  await Plant.save(newPlant);
-
-  return res.status(201).json({
-    newPlant: {
-      id,
+    const newPlant = await Plant.createPlant(
       mainImage,
       nickname,
       plantName,
@@ -54,15 +42,49 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
       memo,
       advice,
       openAllow,
-    },
-    user: {
-      id: user.id,
-      username: user.username,
-    },
-    // familyName,
-  });
+    );
 
-  // .catch((err) => res.status(400).send(err));
+    if (newPlant === undefined) {
+      return res.status(404).end();
+    }
+
+    newPlant.user = user;
+
+    if (family) {
+      newPlant.family = family;
+    }
+
+    await Plant.save(newPlant);
+    // console.log(newPlant);
+
+    const body = {
+      id: newPlant.id,
+      mainImage: newPlant.mainImage,
+      nickname: newPlant.nickname,
+      plantName: newPlant.plantName,
+      scientificName: newPlant.scientificName,
+      adoptionDate: newPlant.adoptionDate,
+      deathDate: newPlant.deathDate,
+      memo: newPlant.memo,
+      advice: newPlant.advice,
+      openAllow: newPlant.openAllow,
+      user: {
+        id: user.id,
+        username: user.username,
+      },
+      family: {},
+    };
+
+    if (family) {
+      body.family = {
+        id: family.id,
+        familyName: family.familyName,
+      };
+    }
+    return res.status(201).json(body);
+  } catch (error) {
+    return res.status(400).json(error);
+  }
 };
 
 // * 식물 정보 갖고오기 /plant/:plantId
@@ -83,7 +105,7 @@ const remove = (req: Request, res: Response, next: NextFunction): void => {
   res.json(`plant delete. plantId: ${plantId}`);
 };
 
-// * 그 달의 식물 다이어리 가져오기
+// * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=diaryId&month=month
 const diaryGet = (req: Request, res: Response, next: NextFunction): void => {
   const { month } = req.params;
   res.json(`Diary get. This month is ${month}`);
