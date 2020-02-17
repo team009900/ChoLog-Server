@@ -35,4 +35,24 @@ export default class Family extends BaseEntity {
       .where("family.familyName = :familyName", { familyName })
       .getOne();
   }
+
+  // * familyName 찾거나 없으면 생성
+  static async findOrCreateFamily(
+    familyName: string,
+  ): Promise<Family | undefined> {
+    const findFamily = await this.findOne({ familyName });
+    if (findFamily) {
+      return findFamily;
+    }
+
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(Family)
+        .values({ familyName })
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
+  }
 }
