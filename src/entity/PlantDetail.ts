@@ -3,20 +3,21 @@ import {
   BaseEntity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  InsertResult,
 } from "typeorm";
 import PlantsDatabase from "./PlantsDatabase";
 
 @Entity()
-export default class PlantDataImg extends BaseEntity {
+export default class PlantDetail extends BaseEntity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id!: number;
 
-  @Column({ unique: true })
-  image!: string;
+  @Column({ type: "text" })
+  contents!: string;
+
+  @Column()
+  type!: string;
 
   @CreateDateColumn({ name: "created_at", type: "timestamp" })
   public createdAt!: Date;
@@ -24,25 +25,17 @@ export default class PlantDataImg extends BaseEntity {
   @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
-  @ManyToOne(
-    (type) => PlantsDatabase,
-    (plantData) => plantData.images,
-    { onDelete: "CASCADE", onUpdate: "CASCADE" },
-  )
-  plantData!: PlantsDatabase;
-
-  static async insertPlantImg(image: string): Promise<PlantDataImg | undefined> {
-    //! 동일한 이미지가 있는지 확인
-    const findImg = await this.findOne({ image });
-    if (findImg) {
-      return findImg;
+  static async insertPlantDetail(contents: string, type: string): Promise<PlantDetail | undefined> {
+    const findPlant = await this.findOne({ contents });
+    if (findPlant) {
+      return findPlant;
     }
 
     const { id } = (
       await this.createQueryBuilder()
         .insert()
-        .into(PlantDataImg)
-        .values({ image })
+        .into(PlantDetail)
+        .values({ contents, type })
         .execute()
     ).identifiers[0];
 

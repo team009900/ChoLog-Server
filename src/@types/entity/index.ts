@@ -13,7 +13,11 @@ declare namespace entity {
     englishName?: string;
     contentsNo: number;
     images?: PlantDataImg[];
-    api: () => string;
+    tmpImages?: string[];
+  }
+  interface apiType {
+    provider: string;
+    url: string;
   }
 }
 
