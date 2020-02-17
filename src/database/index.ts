@@ -31,6 +31,7 @@ const requestGetBody = (url: string, key: string, log: boolean = true): Promise<
         reject(error);
       }
       if (statusCode.toString()[0] !== "2") {
+        console.log(body);
         reject(new Error(`statusCode: ${statusCode}`));
       }
       // XML을 배열로 바꿈
@@ -178,6 +179,7 @@ const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
   }
 };
 
+//! 현재로직에서 실행 안 함 -> /plantsdb/search로 옮겨갈것임
 const settingDetailPlantData = async (value: PlantsDatabase): Promise<true | false> => {
   const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : "";
   const plantData = value;
@@ -212,7 +214,7 @@ const settingDetailPlantData = async (value: PlantsDatabase): Promise<true | fal
     plantData.detail = newPlantDetail;
 
     await plantData.save();
-    console.log(plantData);
+    // console.log(plantData);
     return true;
   } catch (err) {
     console.error(err);
@@ -220,12 +222,13 @@ const settingDetailPlantData = async (value: PlantsDatabase): Promise<true | fal
   }
 };
 
+//! 현재로직에서 실행 안 함 -> /plantsdb/search로 옮겨갈것임
 const sendApiInterval = async (plantDataList: PlantsDatabase[]) => {
   // console.log(plantDataList[0]);
   const result: boolean = await settingDetailPlantData(plantDataList[0]);
   plantDataList.shift();
   if (plantDataList.length !== 0 && result) {
-    setTimeout(sendApiInterval.bind(sendApiInterval, plantDataList), 1500);
+    setTimeout(sendApiInterval.bind(sendApiInterval, plantDataList), 1000);
   } else if (!result) {
     console.log("result of setting detail plant data: false");
   } else {
@@ -261,10 +264,10 @@ createConnection().then(async () => {
   }
   console.log("result of setting basic plant data: ", result);
 
-  const getAll: PlantsDatabase[] = await PlantsDatabase.find({
-    where: { detail: null },
-    relations: ["api", "detail"],
-  });
-  console.log(`** getAll.length: ${getAll.length}`);
-  await sendApiInterval(getAll.slice(0, 5));
+  // const getAll: PlantsDatabase[] = await PlantsDatabase.find({
+  //   where: { detail: null },
+  //   relations: ["api", "detail"],
+  // });
+  // console.log(`** getAll.length: ${getAll.length}`);
+  // await sendApiInterval(getAll.slice(0, 10));
 });
