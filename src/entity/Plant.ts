@@ -21,7 +21,7 @@ export default class Plant extends BaseEntity {
   id!: number;
 
   @Column({ nullable: true })
-  mainImage!: string;
+  image!: string;
 
   @Column()
   nickname!: string;
@@ -92,5 +92,37 @@ export default class Plant extends BaseEntity {
       return undefined;
     }
     return plant.diaries;
+  }
+
+  // * 새 식물 추가
+  static async createPlant(
+    image: string,
+    nickname: string,
+    plantName: string,
+    scientificName: string,
+    adoptionDate: Date,
+    deathDate: Date,
+    memo: string,
+    advice: string,
+    openAllow: number,
+  ): Promise<Plant | undefined> {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(Plant)
+        .values({
+          image,
+          nickname,
+          plantName,
+          scientificName,
+          adoptionDate,
+          deathDate,
+          memo,
+          advice,
+          openAllow,
+        })
+        .execute()
+    ).identifiers[0];
+    return this.findOne({ id }); // id===id
   }
 }
