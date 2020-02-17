@@ -21,7 +21,7 @@ export default class Plant extends BaseEntity {
   id!: number;
 
   @Column({ nullable: true })
-  mainImage!: string;
+  image!: string;
 
   @Column()
   nickname!: string;
@@ -96,7 +96,7 @@ export default class Plant extends BaseEntity {
 
   // * 새 식물 추가
   static async createPlant(
-    mainImage: string,
+    image: string,
     nickname: string,
     plantName: string,
     scientificName: string,
@@ -111,7 +111,7 @@ export default class Plant extends BaseEntity {
         .insert()
         .into(Plant)
         .values({
-          mainImage,
+          image,
           nickname,
           plantName,
           scientificName,

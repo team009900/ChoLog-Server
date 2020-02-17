@@ -9,7 +9,7 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
   console.log("식물생서어엉~");
   const {
     email,
-    mainImage,
+    image,
     nickname,
     plantName,
     scientificName,
@@ -33,7 +33,7 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const newPlant = await Plant.createPlant(
-      mainImage,
+      image,
       nickname,
       plantName,
       scientificName,
@@ -59,7 +59,7 @@ const post = async (req: Request, res: Response, next: NextFunction) => {
 
     const body = {
       id: newPlant.id,
-      mainImage: newPlant.mainImage,
+      mainImage: newPlant.image,
       nickname: newPlant.nickname,
       plantName: newPlant.plantName,
       scientificName: newPlant.scientificName,
