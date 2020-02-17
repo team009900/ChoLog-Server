@@ -51,7 +51,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
     });
   } catch (err) {
     console.error(err);
-    res.status(400).json(`error: ${err}`);
+    res.status(400).json(`Error name: ${err.name}`);
   }
 };
 
@@ -62,7 +62,7 @@ const patch = (req: Request, res: Response, next: NextFunction): void => {
 const remove = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   try {
     const token = req.headers.authorization?.substring(7);
-    console.log({ token });
+    // console.log({ token });
     if (token === undefined) {
       return res.status(400).json("plz send authorization");
     }
@@ -70,7 +70,7 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
     const jwtSecret: string = process.env.JWT_SECRET ? process.env.JWT_SECRET : "";
 
     const decoded = jwt.verify(token, jwtSecret);
-    console.log(decoded);
+    // console.log(decoded);
 
     if (typeof decoded === "string") {
       return res.status(400).json("plz send valid token");
@@ -87,7 +87,7 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
     return res.status(404).json("You are not exist");
   } catch (err) {
     console.error(err);
-    return res.status(400).json(err);
+    return res.status(400).json(`Error name: ${err.name}`);
   }
 };
 
