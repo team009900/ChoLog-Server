@@ -4,7 +4,7 @@ import User from "../../entity/User";
 
 export default async (req: Request, res: Response) => {
   console.log("회원가입");
-  const { id, email, username, password } = req.body;
+  const { email, username, password } = req.body;
 
   if (!email) {
     //! email이 비어있음
@@ -19,25 +19,26 @@ export default async (req: Request, res: Response) => {
     return res.status(400).json("비밀번호를 입력해주세요");
   }
 
-  const users = await User.findByEmail(email)
-    .then((user) => {
-      if (user) {
-        return res.status(400).json("이미 존재하는 유저입니다.");
-      }
-      const hash = hashSync(password, 12);
+  try {
+    const user = await User.findByEmail(email);
+    if (user) {
+      return res.status(400).json("이미 존재하는 유저입니다.");
+    }
+    const hash = hashSync(password, 12);
 
-      const newUser = User.createUser(id, email, username, hash);
+    const newUser = await User.createUser(email, username, hash);
 
-      return res.status(201).json({
-        id,
-        email,
-        username,
-      });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(400).send(err);
+    if (newUser === undefined) {
+      return res.status(400).json("fail to create user");
+    }
+
+    return res.status(201).json({
+      id: newUser.id,
+      email: newUser.email,
+      username: newUser.username,
     });
-
-  return undefined;
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json(err);
+  }
 };
