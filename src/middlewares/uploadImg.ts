@@ -1,6 +1,4 @@
-import { Express } from "express";
 import * as multer from "multer";
-import * as fs from "fs";
 import * as path from "path";
 import * as AWS from "aws-sdk";
 import * as multerS3 from "multer-s3";
