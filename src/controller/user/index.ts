@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
 import "dotenv/config";
 
 import User from "../../entity/User";
@@ -82,16 +81,8 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
       return res.status(400).json("plz send authorization");
     }
 
-    const jwtSecret: string = process.env.JWT_SECRET ? process.env.JWT_SECRET : "";
-
-    const decoded: any = jwt.verify(token, jwtSecret);
-    // console.log(decoded);
-
-    if (typeof decoded === "string") {
-      return res.status(400).json("plz send valid token");
-    }
-
-    const findUser = await User.findOne({ id: decoded.id });
+    const { id } = (<any>req).decoded;
+    const findUser = await User.findOne({ id });
 
     if (findUser) {
       const deletedUser = await User.remove(findUser);
