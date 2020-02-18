@@ -104,13 +104,19 @@ export default class User extends BaseEntity {
     return target.plants;
   }
 
-  //* user id 로 user 정보 수정 (되는지 안되는지 해봐야 함)
-  static updateUser(id: number, data: userUpdateType): Promise<UpdateResult> {
-    return this.createQueryBuilder()
+  //* user id 로 user 정보 수정
+  static async updateUser(id: number, data: userUpdateType): Promise<User | undefined> {
+    const result = await this.createQueryBuilder()
       .update(User)
       .set(data)
       .where("id = :id", { id })
       .execute();
+
+    if (result.raw.affectedRows === 0) {
+      return undefined;
+    }
+
+    return this.findOne({ id });
   }
 
   // * 회원가입 유저 생성
