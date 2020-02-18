@@ -5,7 +5,8 @@ import { isNotLoggedIn, isLoggedIn } from "../middlewares";
 
 const router = express.Router();
 
-// router.use(isNotLoggedIn);
+// * GET /auth/:username
+router.get("/:username", authController.get);
 
 // * POST /auth/signup
 router.post("/signup", isNotLoggedIn, authController.signup);
