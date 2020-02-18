@@ -26,7 +26,7 @@ app.use(
   cors({
     origin: process.env.NODE_ENV
       ? process.env.PROD_CORS_ORIGIN
-      : ["http://localhost:8081", "http://10.0.2.2:8081"], // 추후 변경
+      : ["http://localhost:8081", "http://10.0.2.2:8081", "http://127.0.0.1:8081"], // 추후 변경
     methods: ["GET", "POST", "DELETE", "PATCH"],
     credentials: true,
   }),
@@ -59,31 +59,14 @@ app.use(
   passport.authenticate("jwt", { session: false }),
   routes.parameters,
 );
-app.use(
-  "/plant",
-  isLoggedIn,
-  passport.authenticate("jwt", { session: false }),
-  routes.plant,
-);
-app.use(
-  "/plantsdb",
-  isLoggedIn,
-  passport.authenticate("jwt", { session: false }),
-  routes.plantsdb,
-);
-app.use(
-  "/user",
-  isLoggedIn,
-  passport.authenticate("jwt", { session: false }),
-  routes.user,
-);
+app.use("/plant", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.plant);
+app.use("/plantsdb", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.plantsdb);
+app.use("/user", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.user);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
-app.use(
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    next(createError(404));
-  },
-);
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  next(createError(404));
+});
 
 // Errorhandler - 404 에러를 만들어내는 미들웨어(404 에러 핸들링)
 app.use((err: any, req: express.Request, res: express.Response) => {
