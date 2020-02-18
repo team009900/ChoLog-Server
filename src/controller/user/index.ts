@@ -57,6 +57,20 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
 };
 
 const patch = (req: Request, res: Response, next: NextFunction): void => {
+  let deleteImg = req.query["img-del"];
+  if (deleteImg !== "true" && deleteImg !== "false") {
+    res.status(400).json("You send us invalid request");
+    return;
+  }
+  deleteImg = Boolean(deleteImg);
+  const multerS3: any = req.file;
+  let image: string;
+  if (multerS3) {
+    image = multerS3.location;
+  }
+
+  console.log((<any>req).decoded);
+  // console.log("file location", multerS3.location);
   res.json("user patch");
 };
 
