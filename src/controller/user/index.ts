@@ -59,18 +59,19 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
 
 const patch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    let deleteImg = req.query["img-del"];
-    if (deleteImg !== "true" && deleteImg !== "false") {
+    const deleteImgQuery = req.query["img-del"];
+    if (deleteImgQuery !== "true" && deleteImgQuery !== "false" && deleteImgQuery !== undefined) {
       res.status(400).json("You send us invalid request");
       return;
     }
-    deleteImg = Boolean(deleteImg);
+    const deleteImg: boolean = deleteImgQuery === "true";
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
       image = multerS3.location;
     }
 
+    const { id } = (<any>req).decoded; // user id 가져옴
     const { username, commentAllow, open } = req.body;
     let { password } = req.body;
 
@@ -89,17 +90,30 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       }
     });
 
-    //! 유저정보 수정
-    const { id } = (<any>req).decoded; // user id 가져옴
-    const result = await User.updateUser(id, userData);
+    if (deleteImg) {
+      const findUser = await User.findOne({ id });
+      // console.log(findUser);
+      if (findUser === undefined) {
+        res.status(404).json("invalid user");
+        return;
+      }
+      (<any>req).image = findUser.image;
+      userData.image = undefined;
+    }
 
-    if (result.raw.affectedRows === 0) {
+    //! 유저정보 수정
+    const updatedUser = await User.updateUser(id, userData);
+
+    if (updatedUser === undefined) {
       res.status(404).json("invalid user");
       return;
     }
 
     // console.log(result);
     res.json("Modified successfully!");
+    if (deleteImg) {
+      next();
+    }
     return;
   } catch (err) {
     console.error(err);
