@@ -10,6 +10,7 @@ import {
   ManyToMany,
   JoinTable,
 } from "typeorm";
+import { plantUpdateType } from "../@types/entity";
 import User from "./User";
 import Family from "./Family";
 import Diary from "./Diary";
@@ -124,5 +125,16 @@ export default class Plant extends BaseEntity {
         .execute()
     ).identifiers[0];
     return this.findOne({ id }); // id===id
+  }
+
+  // * 식물 정보 수정
+  static async updatePlant(id: number, data: plantType): Promise<Plant | undefined> {
+    await this.createQueryBuilder()
+      .update(Plant)
+      .set(data)
+      .where("plant.id = :id", { id })
+      .execute();
+
+    return this.findOne({ id });
   }
 }
