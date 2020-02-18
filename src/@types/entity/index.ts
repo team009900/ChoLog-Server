@@ -1,5 +1,4 @@
 import PlantDataImg from "../../entity/PlantDataImg";
-import API from "../../entity/API";
 
 declare namespace entity {
   interface userType {
