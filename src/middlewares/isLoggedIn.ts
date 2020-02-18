@@ -18,11 +18,6 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    if (token === undefined) {
-      res.status(400).json("plz send authorization");
-      return;
-    }
-
     const jwtSecret: string = process.env.JWT_SECRET ? process.env.JWT_SECRET : "";
 
     const decoded: any = jwt.verify(token.substring(7), jwtSecret);
