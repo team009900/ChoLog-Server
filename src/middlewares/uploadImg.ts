@@ -17,7 +17,7 @@ const upload = multer({
     s3: new AWS.S3(),
     bucket: "cholog",
     key(req: Express.Request, file: Express.Multer.File, callback) {
-      callback(null, `original/${Date.now()}${path.basename(file.originalname)}`);
+      callback(null, `original/${Date.now()}${encodeURI(path.basename(file.originalname))}`);
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },
