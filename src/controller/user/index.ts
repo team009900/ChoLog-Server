@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
+import { hashSync } from "bcryptjs";
 import "dotenv/config";
 
 import User from "../../entity/User";
+import { userUpdateType } from "../../@types/entity";
 
 const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
@@ -55,22 +57,54 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
   }
 };
 
-const patch = (req: Request, res: Response, next: NextFunction): void => {
-  let deleteImg = req.query["img-del"];
-  if (deleteImg !== "true" && deleteImg !== "false") {
-    res.status(400).json("You send us invalid request");
-    return;
-  }
-  deleteImg = Boolean(deleteImg);
-  const multerS3: any = req.file;
-  let image: string;
-  if (multerS3) {
-    image = multerS3.location;
-  }
+const patch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    let deleteImg = req.query["img-del"];
+    if (deleteImg !== "true" && deleteImg !== "false") {
+      res.status(400).json("You send us invalid request");
+      return;
+    }
+    deleteImg = Boolean(deleteImg);
+    const multerS3: any = req.file;
+    let image: string | undefined;
+    if (multerS3) {
+      image = multerS3.location;
+    }
 
-  console.log((<any>req).decoded);
-  // console.log("file location", multerS3.location);
-  res.json("user patch");
+    const { username, commentAllow, open } = req.body;
+    let { password } = req.body;
+
+    //! password hashing
+    if (password) {
+      password = hashSync(password, 12);
+    }
+
+    const userData: userUpdateType = { username, password, image, commentAllow, open };
+
+    //! body로 입력되지 않은 데이터의 key value쌍 삭제
+    const userDataKeys: string[] = Object.keys(userData);
+    userDataKeys.forEach((key: string) => {
+      if (userData[key] === undefined) {
+        delete userData[key];
+      }
+    });
+
+    //! 유저정보 수정
+    const { id } = (<any>req).decoded; // user id 가져옴
+    const result = await User.updateUser(id, userData);
+
+    if (result.raw.affectedRows === 0) {
+      res.status(404).json("invalid user");
+      return;
+    }
+
+    // console.log(result);
+    res.json("Modified successfully!");
+    return;
+  } catch (err) {
+    console.error(err);
+    res.status(400).json(`Error name: ${err.name}`);
+  }
 };
 
 const remove = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
