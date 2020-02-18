@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
-import User from "../../entity/User";
 import "dotenv/config";
+
+import User from "../../entity/User";
 
 const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
@@ -69,7 +70,7 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
 
     const jwtSecret: string = process.env.JWT_SECRET ? process.env.JWT_SECRET : "";
 
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded: any = jwt.verify(token, jwtSecret);
     // console.log(decoded);
 
     if (typeof decoded === "string") {
