@@ -72,6 +72,7 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
     }
 
     const { id } = (<any>req).decoded; // user id 가져옴
+    console.log((<any>req).decoded);
     const { username, commentAllow, open } = req.body;
     let { password } = req.body;
 

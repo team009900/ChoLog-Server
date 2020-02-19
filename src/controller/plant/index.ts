@@ -165,8 +165,6 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
   }
 
   const {
-    id,
-    image,
     nickname,
     plantName,
     scientificName,
@@ -179,43 +177,59 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
   } = req.body;
 
   try {
-    let family; // familyName이 없을 수도 있기 때문에 밖에서 선언
+    // id로 plant 찾기
+    const findPlant = await Plant.findOne({ where: { id: plantId } });
+    if (findPlant === undefined) {
+      res.status(404).json(`Plant ${plantId} does not exist`);
+      return;
+    }
+
+    const deleteImgQuery = req.query["img-del"];
+    if (deleteImgQuery !== "true" && deleteImgQuery !== "false" && deleteImgQuery !== undefined) {
+      res.status(400).json("You send us invalid request");
+      return;
+    }
+    const deleteImg: boolean = deleteImgQuery === "true";
+
+    const multerS3: any = req.file;
+    let image: string | undefined;
+    if (multerS3) {
+      image = multerS3.location;
+    }
+
+    let family: any; // familyName이 없을 수도 있기 때문에 밖에서 선언
     if (familyName) {
       // familyName이 있으면 찾고, 찾아도 없으면 생성해준다.
       family = await Family.findOrCreateFamily(familyName);
     }
 
-    const plantData: plantUpdateType = {};
+    const plantData: plantUpdateType = {
+      image,
+      nickname,
+      plantName,
+      scientificName,
+      adoptionDate,
+      deathDate,
+      memo,
+      advice,
+      openAllow,
+      familyName,
+    };
 
-    if (image) {
-      plantData.image = image;
-    }
-    if (nickname) {
-      plantData.nickname = nickname;
-    }
-    if (plantName) {
-      plantData.plantName = plantName;
-    }
-    if (scientificName) {
-      plantData.scientificName = scientificName;
-    }
-    if (adoptionDate) {
-      plantData.adoptionDate = adoptionDate;
-    }
-    if (deathDate) {
-      plantData.deathDate = deathDate;
-    }
-    if (memo) {
-      plantData.memo = memo;
-    }
-    if (advice) {
-      plantData.advice = advice;
-    }
-    if (openAllow) {
-      plantData.openAllow = openAllow;
+    // body로 입력되지 않은 데이터는 지워주지 않으면 자동으로 null로 들어가서 정보가 수정되기 때문에 그 값을 지워줌
+    const plantDataKeys: string[] = Object.keys(plantData);
+    plantDataKeys.forEach((key: string) => {
+      if (plantData[key] === undefined) {
+        delete plantData[key];
+      }
+    });
+
+    if (deleteImg) {
+      (<any>req).image = findPlant.image;
+      plantData.image = undefined;
     }
 
-    const updatePlant = await Plant.updatePlant(Number(plantId), plantData);
+    const updatePlant = await Plant.updatePlant(findPlant.id, plantData);
 
     if (updatePlant === undefined) {
       res.status(404).end();
@@ -249,6 +263,9 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
     }
 
     res.status(200).json(body);
+    if (deleteImg) {
+      next();
+    }
   } catch (error) {
     console.error(error);
     res.status(400).json(`Error: ${error}`);
@@ -283,6 +300,7 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
 // * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=plantId&month=month
 const diaryGet = (req: Request, res: Response, next: NextFunction): void => {
   const { month } = req.params;
+
   res.json(`Diary get. This month is ${month}`);
 };
 
