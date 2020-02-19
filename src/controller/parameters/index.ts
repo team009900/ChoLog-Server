@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import * as plant from "./plant";
+import postPlant from "./postPlant";
+import patchPlant from "./patchPlant";
+import getPlant from "./getPlant";
 
-const get = (req: Request, res: Response, next: NextFunction): void => {
+const getAll = (req: Request, res: Response, next: NextFunction): void => {
   res.json("all parameters get.");
 };
 
-export { get, plant };
+export { postPlant, getPlant, getAll, patchPlant };
