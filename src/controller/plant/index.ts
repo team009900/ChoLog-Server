@@ -10,7 +10,6 @@ import Diary from "../../entity/Diary";
 const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log("식물생서어엉~");
   const {
-    email,
     image,
     nickname,
     plantName,
@@ -23,14 +22,16 @@ const post = async (req: Request, res: Response, next: NextFunction): Promise<vo
     familyName,
   } = req.body;
 
+  const { id } = (<any>req).decoded;
+
   try {
-    const user = await User.findByEmail(email);
-    if (!user) {
+    const findUser = await User.findOne({ id });
+    if (!findUser) {
       res.status(400).json("존재하지 않는 유저입니다.");
       return;
     }
 
-    let family; // familyName이 없을 수도 있기 때문에 밖에서 선언
+    let family: any; // familyName이 없을 수도 있기 때문에 밖에서 선언
     if (familyName) {
       family = await Family.findOrCreateFamily(familyName); // familyName이 있으면 찾고, 찾아도 없으면 생성해준다.
     }
@@ -52,7 +53,12 @@ const post = async (req: Request, res: Response, next: NextFunction): Promise<vo
       return;
     }
 
-    newPlant.user = user;
+    newPlant.user = findUser;
+
+    const multerS3: any = req.file;
+    if (multerS3) {
+      newPlant.image = multerS3.location;
+    }
 
     if (family) {
       newPlant.family = family;
@@ -73,8 +79,8 @@ const post = async (req: Request, res: Response, next: NextFunction): Promise<vo
       advice: newPlant.advice,
       openAllow: newPlant.openAllow,
       user: {
-        id: user.id,
-        username: user.username,
+        id: findUser.id,
+        username: findUser.username,
       },
       family: {},
     };
@@ -317,7 +323,6 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
   }
 
   const diaryFullDate = `${diaryYear}-${diaryMonth}`; // "YYYY-MM"
-  console.log({ diaryFullDate });
 
   try {
     const findPlantDiary = await Plant.findDiariesById(plantId);
@@ -334,13 +339,11 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
       const year = dateFormat.slice(0, 4); // "YYYY"
       const month = dateFormat.slice(5, 7); // "MM"
       const fullDate = `${year}-${month}`; // "YYYY-MM"
-      console.log({ fullDate });
 
       if (diaryFullDate === fullDate) {
         plantsDiary.push(tmpDiary);
       }
     });
-    console.log(plantsDiary);
 
     res.status(200).json(plantsDiary);
     return;
