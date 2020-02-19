@@ -9,8 +9,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
+
 import Plant from "./Plant";
 import State from "./State";
+import { diaryType } from "../@types/entity";
 
 @Entity()
 export default class Diary extends BaseEntity {
@@ -57,5 +59,25 @@ export default class Diary extends BaseEntity {
     return this.createQueryBuilder("diary")
       .where("diary.id = :id", { id })
       .getOne();
+  }
+
+  //* diary 추가
+  static async insertDiary(data: diaryType): Promise<Diary | undefined> {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(Diary)
+        .values(data)
+        .execute()
+    ).identifiers[0];
+    // console.log(data);
+
+    const findDiary = await this.findOne({ id }, { relations: ["states"] });
+    if (findDiary && data.states) {
+      findDiary.states = data.states;
+      // findDiary.save();
+    }
+
+    return findDiary;
   }
 }
