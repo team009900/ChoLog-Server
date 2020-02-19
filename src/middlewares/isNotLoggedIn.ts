@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import * as jwt from "jsonwebtoken";
 import Blacklist from "../entity/Blacklist";
+import "dotenv/config";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   if (!req.headers.authorization) {
@@ -8,14 +10,23 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
     const blacklistToken = await Blacklist.findByToken(token);
 
+    if (blacklistToken) {
+      // 블랙리스트 토큰이면 재로그인
+      next();
+      return;
+    }
+
     try {
-      if (blacklistToken) {
-        next();
-        return;
-      }
-      res.status(403).json("이미 로그인 되어 있습니다."); // 토큰이 있지만 블랙리스트가 아닐 때
+      const jwtSecret: string = process.env.JWT_SECRET ? process.env.JWT_SECRET : "";
+      const verifyToken = jwt.verify(token.substring(7), jwtSecret, (err, decoded) => {
+        if (decoded) {
+          return res.status(401).json("이미 로그인 되어 있습니다."); // 토큰 유효기간 안지났을 때
+        }
+        return next(); // 토큰 유효기간 지나면 재로그인
+      });
     } catch (error) {
-      res.status(400).json(error);
+      console.error(error);
+      res.status(401).json(`Error name: ${error.name}`);
     }
   }
 };
