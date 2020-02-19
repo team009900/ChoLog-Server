@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import User from "../../entity/User";
 import { userUpdateType } from "../../@types/entity";
+import Plant from "../../entity/Plant";
 
 const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
@@ -121,7 +122,7 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
   }
 };
 
-const remove = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+const remove = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = (<any>req).decoded;
     const findUser = await User.findOne({ id });
@@ -129,18 +130,54 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
     if (findUser) {
       const deletedUser = await User.remove(findUser);
       if (deletedUser) {
-        return res.status(204).json();
+        res.status(204).json();
+        return;
       }
     }
-    return res.status(404).json("You are not exist");
+    res.status(404).json("You are not exist");
+    return;
   } catch (err) {
     console.error(err);
-    return res.status(400).json(`Error name: ${err.name}`);
+    res.status(400).json(`Error name: ${err.name}`);
   }
 };
 
-const plantsGet = (req: Request, res: Response, next: NextFunction): void => {
-  res.json("User's plants get.");
+const plantsGet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = (<any>req).decoded;
+
+    const findUser = await User.findOne({ id }, { relations: ["plants"] });
+    // console.log(findUser);
+
+    if (findUser === undefined) {
+      res.status(404).json("Not exist user");
+      return;
+    }
+
+    if (findUser.plants === undefined) {
+      res.status(200).json([]);
+      return;
+    }
+
+    let { plants } = findUser;
+    plants = plants.map((plant: Plant) => {
+      const tmpPlant: Plant = plant;
+      delete tmpPlant.plantName;
+      delete tmpPlant.scientificName;
+      delete tmpPlant.memo;
+      delete tmpPlant.advice;
+      delete tmpPlant.updatedAt;
+      delete tmpPlant.createdAt;
+
+      return tmpPlant;
+    });
+
+    res.status(200).json(plants);
+    return;
+  } catch (err) {
+    console.error(err);
+    res.status(400).json(`Error name: ${err.name}`);
+  }
 };
 
 export { get, plantsGet, patch, remove as delete };
