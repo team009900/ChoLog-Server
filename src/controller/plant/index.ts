@@ -156,7 +156,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
 };
 
 // * 식물 정보 수정 /plant/:plantId
-const patch = async (req: Request, res: Response, next: NextFunction): Promise<Plant | void> => {
+const patch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { plantId } = req.params;
 
   if (!Number(plantId)) {
@@ -256,9 +256,28 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<P
 };
 
 // * 식물 삭제 /plant/:plantId
-const remove = (req: Request, res: Response, next: NextFunction): void => {
+const remove = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   const { plantId } = req.params;
-  res.json(`plant delete. plantId: ${plantId}`);
+  if (!Number(plantId)) {
+    return res.status(400).json("You send us bad request");
+  }
+
+  try {
+    const findPlant = await Plant.findOne({
+      where: { id: plantId },
+    });
+
+    if (findPlant === undefined) {
+      return res.status(404).json(`Plant ${plantId} does not exist`);
+    }
+
+    await Plant.remove(findPlant);
+
+    return res.status(200).json(`id: ${plantId} is deleted successfully`);
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json(`Error: ${error}`);
+  }
 };
 
 // * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=plantId&month=month

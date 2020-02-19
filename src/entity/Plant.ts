@@ -128,7 +128,7 @@ export default class Plant extends BaseEntity {
   }
 
   // * 식물 정보 수정
-  static async updatePlant(id: number, data: plantType): Promise<Plant | undefined> {
+  static async updatePlant(id: number, data: plantUpdateType): Promise<Plant | undefined> {
     await this.createQueryBuilder()
       .update(Plant)
       .set(data)
