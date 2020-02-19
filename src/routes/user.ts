@@ -1,6 +1,6 @@
 import * as express from "express";
 import { userController } from "../controller";
-import { uploadImg, deleteImg } from "../middlewares";
+import { uploadImg } from "../middlewares";
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get("/plants", userController.plantsGet);
 router.get("/:userId", userController.get);
 
 //* PATCH /user
-router.patch("/", uploadImg.single("image"), userController.patch, deleteImg);
+router.patch("/", uploadImg.single("image"), userController.patch);
 
 //* DELETE /user
 router.delete("/", userController.delete);
