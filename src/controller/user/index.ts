@@ -123,12 +123,6 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
 
 const remove = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   try {
-    const token = req.headers.authorization?.substring(7);
-    // console.log({ token });
-    if (token === undefined) {
-      return res.status(400).json("plz send authorization");
-    }
-
     const { id } = (<any>req).decoded;
     const findUser = await User.findOne({ id });
 
