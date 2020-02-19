@@ -17,11 +17,21 @@ declare namespace entity {
     images?: PlantDataImg[];
     tmpImages?: string[];
   }
+
   interface apiType {
     provider: string;
     url: string;
   }
 
+  interface diaryType {
+    image?: string;
+    note?: string;
+    degree?: number;
+    weatherName?: string;
+    humidity?: number;
+    finedust?: number;
+    createdAt: Date;
+  }
   interface plantUpdateType {
     image?: string;
     nickname?: string;
