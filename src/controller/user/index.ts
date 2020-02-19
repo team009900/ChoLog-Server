@@ -5,6 +5,7 @@ import "dotenv/config";
 import User from "../../entity/User";
 import { userUpdateType } from "../../@types/entity";
 import Plant from "../../entity/Plant";
+import { deleteImg } from "../../services";
 
 const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
@@ -65,7 +66,7 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       res.status(400).json("You send us invalid request");
       return;
     }
-    const deleteImg: boolean = deleteImgQuery === "true";
+    const isDeleteImg: boolean = deleteImgQuery === "true";
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
@@ -91,14 +92,14 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       }
     });
 
-    if (deleteImg) {
+    if (isDeleteImg) {
       const findUser = await User.findOne({ id });
       // console.log(findUser);
       if (findUser === undefined) {
         res.status(404).json("invalid user");
         return;
       }
-      (<any>req).image = findUser.image;
+      await deleteImg(findUser.image);
       userData.image = undefined;
     }
 
@@ -112,9 +113,6 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
 
     // console.log(result);
     res.json("Modified successfully!");
-    if (deleteImg) {
-      next();
-    }
     return;
   } catch (err) {
     console.error(err);
