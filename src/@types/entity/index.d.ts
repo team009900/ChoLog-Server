@@ -32,6 +32,17 @@ declare namespace entity {
     finedust?: number;
     createdAt: Date;
   }
+  interface plantUpdateType {
+    image?: string;
+    nickname?: string;
+    plantName?: string;
+    scientificName?: string;
+    adoptionDate?: Date;
+    deathDate?: Date;
+    memo?: string;
+    advice?: string;
+    openAllow?: number;
+  }
 }
 
 export = entity;

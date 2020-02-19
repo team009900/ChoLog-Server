@@ -41,7 +41,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
               },
               jwtSecret,
               {
-                expiresIn: "1d",
+                expiresIn: "7d",
                 issuer: "009900",
               },
             );
