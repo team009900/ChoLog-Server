@@ -8,7 +8,6 @@ import {
   BaseEntity,
   ManyToMany,
   JoinTable,
-  UpdateResult,
 } from "typeorm";
 import Plant from "./Plant";
 import { userUpdateType } from "../@types/entity";
