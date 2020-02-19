@@ -8,9 +8,10 @@ import {
   BaseEntity,
   ManyToMany,
   JoinTable,
+  UpdateResult,
 } from "typeorm";
 import Plant from "./Plant";
-import { userType } from "../@types/entity";
+import { userUpdateType } from "../@types/entity";
 import Blacklist from "./Blacklist";
 
 @Entity()
@@ -103,17 +104,27 @@ export default class User extends BaseEntity {
     return target.plants;
   }
 
-  //* user id 로 user 정보 수정 (되는지 안되는지 해봐야 함)
-  static modifyById(id: number, data: userType) {
-    return this.createQueryBuilder()
+  //* user id 로 user 정보 수정
+  static async updateUser(id: number, data: userUpdateType): Promise<User | undefined> {
+    const result = await this.createQueryBuilder()
       .update(User)
       .set(data)
       .where("id = :id", { id })
       .execute();
+
+    if (result.raw.affectedRows === 0) {
+      return undefined;
+    }
+
+    return this.findOne({ id });
   }
 
   // * 회원가입 유저 생성
-  static async createUser(email: string, username: string, password: string) {
+  static async createUser(
+    email: string,
+    username: string,
+    password: string,
+  ): Promise<User | undefined> {
     const { id } = (
       await this.createQueryBuilder()
         .insert()

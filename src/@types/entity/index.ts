@@ -1,10 +1,12 @@
 import PlantDataImg from "../../entity/PlantDataImg";
-import API from "../../entity/API";
 
 declare namespace entity {
-  interface userType {
-    image?: string;
+  interface userUpdateType {
     username?: string;
+    image?: string;
+    password?: string;
+    commentAllow?: number;
+    open?: number;
   }
 
   interface plantsDatabaseType {
