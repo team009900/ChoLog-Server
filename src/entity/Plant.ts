@@ -87,7 +87,7 @@ export default class Plant extends BaseEntity {
 
   //* plant id로 diaries찾기
   static async findDiariesById(id: number): Promise<Diary[] | undefined> {
-    const plant = await this.findById(id);
+    const plant = await this.findOne({ id }, { relations: ["diaries"] });
 
     if (plant === undefined) {
       return undefined;

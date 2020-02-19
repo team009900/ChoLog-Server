@@ -3,6 +3,8 @@ import Plant from "../../entity/Plant";
 import { plantUpdateType } from "../../@types/entity";
 import Family from "../../entity/Family";
 import User from "../../entity/User";
+import { deleteImg } from "../../services";
+import Diary from "../../entity/Diary";
 
 // * 새 식물 생성 /plant
 const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -189,7 +191,7 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       res.status(400).json("You send us invalid request");
       return;
     }
-    const deleteImg: boolean = deleteImgQuery === "true";
+    const isDeleteImg: boolean = deleteImgQuery === "true";
 
     const multerS3: any = req.file;
     let image: string | undefined;
@@ -213,7 +215,6 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       memo,
       advice,
       openAllow,
-      familyName,
     };
 
     // body로 입력되지 않은 데이터는 지워주지 않으면 자동으로 null로 들어가서 정보가 수정되기 때문에 그 값을 지워줌
@@ -224,8 +225,8 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
       }
     });
 
-    if (deleteImg) {
-      (<any>req).image = findPlant.image;
+    if (isDeleteImg) {
+      await deleteImg(findPlant.image);
       plantData.image = undefined;
     }
 
@@ -263,9 +264,7 @@ const patch = async (req: Request, res: Response, next: NextFunction): Promise<v
     }
 
     res.status(200).json(body);
-    if (deleteImg) {
-      next();
-    }
+    return;
   } catch (error) {
     console.error(error);
     res.status(400).json(`Error: ${error}`);
@@ -298,10 +297,57 @@ const remove = async (req: Request, res: Response, next: NextFunction): Promise<
 };
 
 // * 그 달의 식물 다이어리 가져오기 /plant/diaries?id=plantId&month=month
-const diaryGet = (req: Request, res: Response, next: NextFunction): void => {
-  const { month } = req.params;
+const diaryGet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const plantId = req.query.id;
+  const diaryYear = req.query.year;
+  const diaryMonth = req.query.month;
 
-  res.json(`Diary get. This month is ${month}`);
+  if (diaryYear === undefined || diaryMonth === undefined) {
+    res.status(400).json("날짜를 입력해주세요.");
+    return;
+  }
+
+  if (diaryMonth.toString().length !== 2 || diaryYear.toString().length !== 4) {
+    res.status(400).json("YYYY-MM 형식으로 입력해 주세요.");
+    return;
+  }
+  if (diaryMonth < 1 || diaryMonth > 12) {
+    res.status(400).json("This is a invalid month.");
+    return;
+  }
+
+  const diaryFullDate = `${diaryYear}-${diaryMonth}`; // "YYYY-MM"
+  console.log({ diaryFullDate });
+
+  try {
+    const findPlantDiary = await Plant.findDiariesById(plantId);
+    if (findPlantDiary === undefined) {
+      res.status(404).json(`Plant ${plantId} does not exist`);
+      return;
+    }
+
+    const plantsDiary: Diary[] = [];
+    findPlantDiary.forEach((diary: Diary) => {
+      const tmpDiary: Diary = diary;
+      const dateFormat = tmpDiary.createdAt.toISOString().slice(0, 10);
+
+      const year = dateFormat.slice(0, 4); // "YYYY"
+      const month = dateFormat.slice(5, 7); // "MM"
+      const fullDate = `${year}-${month}`; // "YYYY-MM"
+      console.log({ fullDate });
+
+      if (diaryFullDate === fullDate) {
+        plantsDiary.push(tmpDiary);
+      }
+    });
+    console.log(plantsDiary);
+
+    res.status(200).json(plantsDiary);
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(`Error name: ${error.name}`);
+  }
 };
 
 export { post, get, diaryGet, patch, remove as delete };
