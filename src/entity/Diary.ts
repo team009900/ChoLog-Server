@@ -9,8 +9,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
+
 import Plant from "./Plant";
 import State from "./State";
+import { diaryType } from "../@types/entity";
+import Weather from "./Weather";
 
 @Entity()
 export default class Diary extends BaseEntity {
@@ -24,10 +27,7 @@ export default class Diary extends BaseEntity {
   note!: string;
 
   @Column({ nullable: true })
-  degree!: number;
-
-  @Column({ nullable: true })
-  weatherName!: string;
+  temperature!: number;
 
   @Column({ nullable: true })
   humidity!: number;
@@ -52,10 +52,37 @@ export default class Diary extends BaseEntity {
   @JoinTable({ name: "diary_state" })
   states!: State[];
 
+  @ManyToOne(
+    (type) => Weather,
+    (weather) => weather.diaries,
+    { onDelete: "SET NULL", onUpdate: "CASCADE" },
+  )
+  weather!: Weather;
+
   //* diary id로 diary찾기
   static findById(id: number): Promise<Diary | undefined> {
     return this.createQueryBuilder("diary")
       .where("diary.id = :id", { id })
       .getOne();
+  }
+
+  //* diary 추가
+  static async insertDiary(data: diaryType): Promise<Diary | undefined> {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(Diary)
+        .values(data)
+        .execute()
+    ).identifiers[0];
+    // console.log(data);
+
+    const findDiary = await this.findOne({ id }, { relations: ["states"] });
+    if (findDiary && data.states) {
+      findDiary.states = data.states;
+      // findDiary.save();
+    }
+
+    return findDiary;
   }
 }

@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import Parameter from "./Parameter";
+import { stateType } from "../@types/entity";
 
 @Entity()
 export default class State extends BaseEntity {
@@ -29,4 +30,21 @@ export default class State extends BaseEntity {
     { onDelete: "CASCADE", onUpdate: "CASCADE" },
   )
   parameter!: Parameter;
+
+  static async insertState(parameter: Parameter, level: number): Promise<State | undefined> {
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(State)
+        .values({ level })
+        .execute()
+    ).identifiers[0];
+
+    const findState = await this.findOne({ id });
+    if (findState) {
+      findState.parameter = parameter;
+      // findState.save();
+    }
+    return findState;
+  }
 }
