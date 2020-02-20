@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Diary } from "../../entity";
+import { deleteImg } from "../../services";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -13,6 +14,12 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     const findDiary = await Diary.findOne({ id: diaryId });
 
     if (findDiary) {
+      const { image } = findDiary;
+      // console.log("find diary image", image);
+      if (image) {
+        await deleteImg(image);
+      }
+
       const deletedDiary = await Diary.remove(findDiary);
       if (deletedDiary) {
         res.status(204).json();
