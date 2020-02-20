@@ -48,9 +48,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
             return undefined;
           }
 
-          const newState = await State.insertState(findParam, oneState.level);
-          // console.log(newState);
-          return newState;
+          return State.insertState(findParam, oneState.level);
         }),
       );
     }

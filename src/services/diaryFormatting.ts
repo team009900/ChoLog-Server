@@ -10,6 +10,7 @@ export default (value: Diary): Diary => {
     }
   });
   diary.states.forEach((oneState) => {
+    // console.log(oneState);
     const updateState = oneState;
     updateState.id = oneState.parameter.id;
     delete updateState.parameter;
