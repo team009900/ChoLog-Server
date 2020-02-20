@@ -4,19 +4,12 @@ import Plant from "../../entity/Plant";
 import Diary from "../../entity/Diary";
 import State from "../../entity/State";
 import Parameter from "../../entity/Parameter";
+import Weather from "../../entity/Weather";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { plantId } = req.params;
-    const {
-      createdAt,
-      note,
-      weatherId: weatherName,
-      humidity,
-      finedust,
-      state,
-      temperature,
-    } = req.body;
+    const { createdAt, note, weatherId, humidity, finedust, state, temperature } = req.body;
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
@@ -26,11 +19,11 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     const diaryData: diaryType = {
       createdAt,
       note,
-      weatherName,
       humidity,
       finedust,
       image,
       temperature,
+      weatherId,
     };
 
     //! body로 입력되지 않은 데이터의 key value쌍 삭제
@@ -71,6 +64,16 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     if (newDiary === undefined) {
       res.status(400).json("Fail to insert diary");
       return;
+    }
+
+    if (weatherId) {
+      const findWeather = await Weather.findOne({ id: weatherId });
+      if (findWeather === undefined) {
+        res.status(400).json("Fail to find weather");
+        return;
+      }
+
+      newDiary.weather = findWeather;
     }
 
     const findPlant: Plant | undefined = await Plant.findOne({ id: Number(plantId) });

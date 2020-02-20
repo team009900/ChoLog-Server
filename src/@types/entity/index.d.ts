@@ -38,6 +38,7 @@ declare namespace entity {
     finedust?: number;
     createdAt: Date;
     state?: stateType[];
+    weatherId?: number;
     states?: State[];
   }
 
