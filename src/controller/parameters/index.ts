@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import Plant from "../../entity/Plant";
 import Parameter from "../../entity/Parameter";
 import postPlant from "./postPlant";
 import patchPlant from "./patchPlant";
