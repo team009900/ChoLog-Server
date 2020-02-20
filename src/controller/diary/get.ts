@@ -9,7 +9,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     const findDiary: Diary | undefined = await Diary.findOne(
       { id: Number(diaryId) },
-      { relations: ["states", "plant"] },
+      { relations: ["states", "plant", "states.parameter"] },
     );
 
     if (findDiary === undefined) {
