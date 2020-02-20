@@ -7,8 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import Parameter from "./Parameter";
 import { stateType } from "../@types/entity";
+import { Parameter } from ".";
 
 @Entity()
 export default class State extends BaseEntity {
@@ -43,8 +43,30 @@ export default class State extends BaseEntity {
     const findState = await this.findOne({ id });
     if (findState) {
       findState.parameter = parameter;
-      // findState.save();
+      findState.save();
     }
+    return findState;
+  }
+
+  static async findOrCreate(parameterId: number, level: number): Promise<State | undefined> {
+    const findParameter: Parameter | undefined = await Parameter.findOne({ id: parameterId });
+    // console.log("---findParam", findParameter);
+
+    if (findParameter === undefined) {
+      return undefined;
+    }
+
+    const findState = await this.findOne({ parameter: findParameter });
+
+    if (findState === undefined) {
+      const newState = await this.insertState(findParameter, level);
+      return newState;
+    }
+
+    findState.level = level;
+    findState.parameter = findParameter;
+    await findState.save();
+    // console.log("findState.parameter", findState.parameter);
     return findState;
   }
 }

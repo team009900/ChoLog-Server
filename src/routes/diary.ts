@@ -11,7 +11,7 @@ router.post("/:plantId", uploadImg.single("image"), diaryController.post);
 router.get("/:diaryId", diaryController.get);
 
 //* PATCH /diary/:diaryId
-router.patch("/:diaryId", diaryController.patch);
+router.patch("/:diaryId", uploadImg.single("image"), diaryController.patch);
 
 //* DELETE /diary/:diaryId
 router.delete("/:diaryId", diaryController.delete);

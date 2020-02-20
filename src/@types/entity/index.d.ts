@@ -38,6 +38,20 @@ declare namespace entity {
     finedust?: number;
     createdAt: Date;
     state?: stateType[];
+    weatherId?: number;
+    states?: State[];
+  }
+
+  interface diaryUpdateType {
+    image?: string;
+    note?: string;
+    temperature?: number;
+    weatherName?: string;
+    humidity?: number;
+    finedust?: number;
+    createdAt?: Date;
+    state?: stateType[];
+    weatherId?: number;
     states?: State[];
   }
 

@@ -1,22 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { diaryType, stateType } from "../../@types/entity";
-import Plant from "../../entity/Plant";
-import Diary from "../../entity/Diary";
-import State from "../../entity/State";
-import Parameter from "../../entity/Parameter";
+import { Plant, Diary, State, Parameter, Weather } from "../../entity";
+import { diaryFormatting } from "../../services";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { plantId } = req.params;
-    const {
-      createdAt,
-      note,
-      weatherId: weatherName,
-      humidity,
-      finedust,
-      state,
-      temperature,
-    } = req.body;
+    const { createdAt, note, weatherId, humidity, finedust, state, temperature } = req.body;
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
@@ -26,11 +16,11 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     const diaryData: diaryType = {
       createdAt,
       note,
-      weatherName,
       humidity,
       finedust,
       image,
       temperature,
+      weatherId,
     };
 
     //! body로 입력되지 않은 데이터의 key value쌍 삭제
@@ -58,9 +48,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
             return undefined;
           }
 
-          const newState = await State.insertState(findParam, oneState.level);
-          // console.log(newState);
-          return newState;
+          return State.insertState(findParam, oneState.level);
         }),
       );
     }
@@ -73,6 +61,16 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       return;
     }
 
+    if (weatherId) {
+      const findWeather = await Weather.findOne({ id: weatherId });
+      if (findWeather === undefined) {
+        res.status(400).json("Fail to find weather");
+        return;
+      }
+
+      newDiary.weather = findWeather;
+    }
+
     const findPlant: Plant | undefined = await Plant.findOne({ id: Number(plantId) });
     if (findPlant === undefined) {
       res.status(400).json("You send bad request");
@@ -82,23 +80,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     // console.log(newDiary);
 
     await newDiary.save();
-
-    delete newDiary.updatedAt;
-    const plantKeys = Object.keys(newDiary.plant);
-    plantKeys.forEach((key) => {
-      if (key !== "id" && key !== "nickname") {
-        delete newDiary.plant[key];
-      }
-    });
-    newDiary.states.forEach((oneState) => {
-      const updateState = oneState;
-      updateState.id = oneState.parameter.id;
-      delete updateState.parameter;
-      delete updateState.createdAt;
-      delete updateState.updatedAt;
-    });
-
-    res.json(newDiary);
+    res.json(diaryFormatting(newDiary));
     return;
   } catch (err) {
     console.error(err);

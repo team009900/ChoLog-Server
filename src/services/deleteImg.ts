@@ -9,7 +9,7 @@ AWS.config.update({
 
 export default (inputImg: string): Promise<any> => {
   const resultPromise = new Promise((resolve, reject) => {
-    // console.log(typeof inputImg, { inputImg });
+    console.log({ inputImg });
     if (typeof inputImg !== "string") {
       console.log("empty img");
       resolve(false);
