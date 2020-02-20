@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { diaryType, stateType } from "../../@types/entity";
-import Plant from "../../entity/Plant";
-import Diary from "../../entity/Diary";
-import State from "../../entity/State";
-import Parameter from "../../entity/Parameter";
-import Weather from "../../entity/Weather";
+import { Plant, Diary, State, Parameter, Weather } from "../../entity";
+import { diaryFormatting } from "../../services";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -85,23 +82,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     // console.log(newDiary);
 
     await newDiary.save();
-
-    delete newDiary.updatedAt;
-    const plantKeys = Object.keys(newDiary.plant);
-    plantKeys.forEach((key) => {
-      if (key !== "id" && key !== "nickname") {
-        delete newDiary.plant[key];
-      }
-    });
-    newDiary.states.forEach((oneState) => {
-      const updateState = oneState;
-      updateState.id = oneState.parameter.id;
-      delete updateState.parameter;
-      delete updateState.createdAt;
-      delete updateState.updatedAt;
-    });
-
-    res.json(newDiary);
+    res.json(diaryFormatting(newDiary));
     return;
   } catch (err) {
     console.error(err);
