@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { setImgDelQuery, removeNullKeys, deleteImg, diaryFormatting } from "../../services";
-import { diaryUpdateType } from "../../@types/entity";
-import { Diary } from "../../entity";
+import { setImgDelQuery, removeNullKeys, deleteImg } from "../../services";
+import { diaryUpdateType, stateType } from "../../@types/entity";
+import { Diary, State } from "../../entity";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -25,7 +25,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       createdAt,
       note,
       weatherId,
-      state,
       temperature,
       image,
     };
@@ -41,6 +40,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
         res.status(404).json("invalid diary id");
         return;
       }
+
       await deleteImg(findDiary.image); // 원래 있던 S3이미지 삭제
 
       //! 이미지삭제 요청을 했지만 formData에 이미지가 있음
@@ -56,17 +56,32 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     //! 일기정보 수정
     const updatedDiary = await Diary.updateDiary(diaryId, diaryData);
-    console.log("updatedDiary", updatedDiary);
 
     if (updatedDiary === undefined) {
       res.status(404).json("invalid diary id");
       return;
     }
 
+    let { states } = updatedDiary;
+    //! 상태변경
+    if (state?.length) {
+      // console.log(state);
+      states = await Promise.all(
+        state.map(async (value: stateType) => {
+          const result = await State.findOrCreate(value.id, value.level);
+          return result;
+        }),
+      );
+      updatedDiary.states = states;
+    }
+
+    await updatedDiary.save();
+    // console.log("updatedDiary", updatedDiary);
+
     res.status(200).json("Modify success");
     return;
   } catch (err) {
     console.error(err);
-    res.status(400).json(`Error name: ${err.name}`);
+    res.status(500).json(`Error name: ${err.name}`);
   }
 };
