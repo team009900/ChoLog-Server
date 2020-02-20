@@ -313,7 +313,7 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
     return;
   }
 
-  if (diaryMonth.toString().length !== 2 || diaryYear.toString().length !== 4) {
+  if (diaryMonth.length !== 2 || diaryYear.length !== 4) {
     res.status(400).json("YYYY-MM 형식으로 입력해 주세요.");
     return;
   }
