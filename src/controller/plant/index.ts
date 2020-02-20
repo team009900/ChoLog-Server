@@ -8,7 +8,6 @@ import Diary from "../../entity/Diary";
 
 // * 새 식물 생성 /plant
 const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  console.log("식물생서어엉~");
   const {
     image,
     nickname,
@@ -92,6 +91,7 @@ const post = async (req: Request, res: Response, next: NextFunction): Promise<vo
       };
     }
     res.status(201).json(body);
+    console.log("식물생서어엉~");
   } catch (error) {
     res.status(400).json(error);
   }
