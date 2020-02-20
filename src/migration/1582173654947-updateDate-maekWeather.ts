@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class updateDateMakeWeather1582173654947 implements MigrationInterface {
+export class updateDateMaekWeather1582173654947 implements MigrationInterface {
   name = "updateDateMakeWeather1582173654947";
 
   public async up(queryRunner: QueryRunner): Promise<any> {
