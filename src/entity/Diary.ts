@@ -13,6 +13,7 @@ import {
 import Plant from "./Plant";
 import State from "./State";
 import { diaryType } from "../@types/entity";
+import Weather from "./Weather";
 
 @Entity()
 export default class Diary extends BaseEntity {
@@ -26,10 +27,7 @@ export default class Diary extends BaseEntity {
   note!: string;
 
   @Column({ nullable: true })
-  degree!: number;
-
-  @Column({ nullable: true })
-  weatherName!: string;
+  temperature!: number;
 
   @Column({ nullable: true })
   humidity!: number;
@@ -53,6 +51,13 @@ export default class Diary extends BaseEntity {
   @ManyToMany((type) => State)
   @JoinTable({ name: "diary_state" })
   states!: State[];
+
+  @ManyToOne(
+    (type) => Weather,
+    (weather) => weather.diaries,
+    { onDelete: "SET NULL", onUpdate: "CASCADE" },
+  )
+  weather!: Weather;
 
   //* diary id로 diary찾기
   static findById(id: number): Promise<Diary | undefined> {
