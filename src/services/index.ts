@@ -1,4 +1,6 @@
 import deleteImg from "./deleteImg";
+import diaryFormatting from "./diaryFormatting";
+import setImgDelQuery from "./setImgDelQuery";
+import removeNullKeys from "./removeNullKeys";
 
-// eslint-disable-next-line import/prefer-default-export
-export { deleteImg };
+export { deleteImg, diaryFormatting, setImgDelQuery, removeNullKeys };

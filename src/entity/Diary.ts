@@ -12,7 +12,7 @@ import {
 
 import Plant from "./Plant";
 import State from "./State";
-import { diaryType } from "../@types/entity";
+import { diaryType, diaryUpdateType } from "../@types/entity";
 import Weather from "./Weather";
 
 @Entity()
@@ -84,5 +84,21 @@ export default class Diary extends BaseEntity {
     }
 
     return findDiary;
+  }
+
+  //* diary id로 diary 수정
+  static async updateDiary(id: number, data: diaryUpdateType): Promise<Diary | undefined> {
+    // const result = await this.update(data, { id });
+    const result = await this.createQueryBuilder()
+      .update(Diary)
+      .set(data)
+      .where("id = :id", { id })
+      .execute();
+
+    if (result.raw.affectedRows === 0) {
+      return undefined;
+    }
+
+    return this.findOne({ id }, { relations: ["plant", "states"] });
   }
 }
