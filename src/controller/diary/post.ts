@@ -9,12 +9,13 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
   try {
     const { plantId } = req.params;
     const {
-      createdDate: createdAt,
+      createdAt,
       note,
       weatherId: weatherName,
       humidity,
       finedust,
       state,
+      temperature,
     } = req.body;
     const multerS3: any = req.file;
     let image: string | undefined;
@@ -22,7 +23,15 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       image = multerS3.location;
     }
 
-    const diaryData: diaryType = { createdAt, note, weatherName, humidity, finedust, image };
+    const diaryData: diaryType = {
+      createdAt,
+      note,
+      weatherName,
+      humidity,
+      finedust,
+      image,
+      temperature,
+    };
 
     //! body로 입력되지 않은 데이터의 key value쌍 삭제
     let diaryDataKeys: string[] = Object.keys(diaryData);

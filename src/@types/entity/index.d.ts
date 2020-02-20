@@ -32,7 +32,7 @@ declare namespace entity {
   interface diaryType {
     image?: string;
     note?: string;
-    degree?: number;
+    temperature?: number;
     weatherName?: string;
     humidity?: number;
     finedust?: number;
