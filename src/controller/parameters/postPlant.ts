@@ -21,13 +21,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     return;
   }
 
-  for (let i = 0; i < parseParameters.length; i + 1) {
-    if (typeof parseParameters[i] !== "number") {
-      res.status(400).json("Array안에는 숫자만 입력 가능합니다.");
-      return;
-    }
-  }
-
   try {
     const findPlant = await Plant.findOne({
       where: { id: plantId, relations: ["parameters"] },
