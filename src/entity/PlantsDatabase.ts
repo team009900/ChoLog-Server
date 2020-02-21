@@ -10,6 +10,7 @@ import {
   InsertResult,
   OneToOne,
   JoinColumn,
+  Like,
 } from "typeorm";
 import API from "./API";
 import { plantsDatabaseType } from "../@types/entity";
@@ -59,12 +60,15 @@ export default class PlantsDatabase extends BaseEntity {
 
   //* 검색
   static findPlantsDataList(target: string): Promise<PlantsDatabase[] | undefined> {
-    return this.createQueryBuilder("plants_database")
-      .where(
-        "distributionName = %:target% OR scientificName = %:target% OR englishName = %:target%",
-        { target },
-      )
-      .getMany();
+    return this.find({
+      where: [
+        { distributionName: Like(`%${target}%`) },
+        { scientificName: Like(`%${target}%`) },
+        { englishName: Like(`%${target}%`) },
+      ],
+      relations: ["images"],
+      select: ["id", "distributionName", "scientificName", "englishName"],
+    });
   }
 
   //* 데이터 입력
