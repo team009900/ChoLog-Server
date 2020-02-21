@@ -8,7 +8,6 @@ import Diary from "../../entity/Diary";
 
 // * 새 식물 생성 /plant
 const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  console.log("식물생서어엉~");
   const {
     image,
     nickname,
@@ -92,6 +91,7 @@ const post = async (req: Request, res: Response, next: NextFunction): Promise<vo
       };
     }
     res.status(201).json(body);
+    console.log("식물생서어엉~");
   } catch (error) {
     res.status(400).json(error);
   }
@@ -157,6 +157,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
     }
 
     res.status(200).json(body);
+    return;
   } catch (error) {
     console.error(error);
     res.status(400).json(`Error: ${error}`);
@@ -313,7 +314,7 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
     return;
   }
 
-  if (diaryMonth.toString().length !== 2 || diaryYear.toString().length !== 4) {
+  if (diaryMonth.length !== 2 || diaryYear.length !== 4) {
     res.status(400).json("YYYY-MM 형식으로 입력해 주세요.");
     return;
   }

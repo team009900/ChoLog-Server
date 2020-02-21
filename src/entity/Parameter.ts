@@ -46,12 +46,8 @@ export default class Parameter extends BaseEntity {
   }
 
   //* parameterName으로 parameter type찾기
-  static async findTypeByName(
-    parameterName: string,
-  ): Promise<number | undefined> {
-    const parameter: Parameter | undefined = await this.findByName(
-      parameterName,
-    );
+  static async findTypeByName(parameterName: string): Promise<number | undefined> {
+    const parameter: Parameter | undefined = await this.findByName(parameterName);
 
     if (parameter === undefined) {
       return undefined;
