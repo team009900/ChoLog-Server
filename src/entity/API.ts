@@ -33,26 +33,20 @@ export default class API extends BaseEntity {
   )
   plantsDataList!: PlantsDatabase[];
 
-  //* provider로 검색
-  static findByProvider(provider: string): Promise<API | undefined> {
-    return this.createQueryBuilder("api")
-      .where("api.provider = :provider", { provider })
-      .getOne();
-  }
-
-  static async insertAPI(
-    provider: string,
-    url: string,
-  ): Promise<InsertResult | false> {
-    const findOne = await this.findByProvider(provider);
+  static async findOrCreate(provider: string, url: string): Promise<API | undefined> {
+    const findOne = await this.findOne({ provider });
     if (findOne) {
-      return false;
+      return undefined;
     }
 
-    return this.createQueryBuilder()
-      .insert()
-      .into(API)
-      .values({ provider, url })
-      .execute();
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(API)
+        .values({ provider, url })
+        .execute()
+    ).identifiers[0];
+
+    return this.findOne({ id });
   }
 }
