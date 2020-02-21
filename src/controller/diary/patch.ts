@@ -6,7 +6,9 @@ import { Diary, State } from "../../entity";
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const diaryId: number = Number(req.params.diaryId);
-    const { humidity, createdAt, note, weatherId, states: baseStates, temperature } = req.body;
+    const { humidity, createdAt, note, weatherId, temperature } = req.body;
+    let { states: baseStates } = req.body;
+    baseStates = JSON.parse(baseStates);
 
     const isDeleteImg: boolean | undefined = setImgDelQuery(req.query["img-del"]);
     if (isDeleteImg === undefined) {
