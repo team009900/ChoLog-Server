@@ -62,6 +62,7 @@ app.use(
 app.use("/plant", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.plant);
 app.use("/plantsdb", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.plantsdb);
 app.use("/user", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.user);
+app.use("/weather", isLoggedIn, passport.authenticate("jwt", { session: false }), routes.weather);
 
 // 404 - 라우터에 등록되지 않은 주소로 요청이 들어올 때 발생
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
