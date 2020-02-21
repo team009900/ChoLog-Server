@@ -12,7 +12,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       weatherId,
       humidity,
       finedust,
-      states: baseState,
+      states: baseStates,
       temperature,
     } = req.body;
     const multerS3: any = req.file;
@@ -47,10 +47,10 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     }
 
     let states: State[] = [];
-    if (baseState?.length) {
+    if (baseStates?.length) {
       // console.log(state);
       states = await Promise.all(
-        baseState.map(async (oneState: stateType) => {
+        baseStates.map(async (oneState: stateType) => {
           const findParam = await Parameter.findOne({ id: oneState.id });
           if (findParam === undefined) {
             return undefined;
