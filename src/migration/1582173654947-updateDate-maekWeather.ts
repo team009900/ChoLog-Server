@@ -2,7 +2,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class updateDateMaekWeather1582173654947 implements MigrationInterface {
-  name = "updateDateMaekWeather1582173654947";
+  name = "updateDateMakeWeather1582173654947";
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(

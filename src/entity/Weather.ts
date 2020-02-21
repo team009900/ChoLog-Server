@@ -9,6 +9,18 @@ export default class Weather extends BaseEntity {
   @Column()
   name!: string;
 
+  @Column()
+  SKY!: number;
+
+  @Column()
+  PTY!: number;
+
+  @Column({ nullable: true })
+  T1H!: number;
+
+  @Column({ nullable: true })
+  REH!: number;
+
   @OneToMany(
     (type) => Diary,
     (diary) => diary.weather,
