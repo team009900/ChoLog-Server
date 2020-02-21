@@ -6,7 +6,15 @@ import { diaryFormatting } from "../../services";
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { plantId } = req.params;
-    const { createdAt, note, weatherId, humidity, finedust, state, temperature } = req.body;
+    const {
+      createdAt,
+      note,
+      weatherId,
+      humidity,
+      finedust,
+      states: baseState,
+      temperature,
+    } = req.body;
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
@@ -39,10 +47,10 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     }
 
     let states: State[] = [];
-    if (state?.length) {
+    if (baseState?.length) {
       // console.log(state);
       states = await Promise.all(
-        state.map(async (oneState: stateType) => {
+        baseState.map(async (oneState: stateType) => {
           const findParam = await Parameter.findOne({ id: oneState.id });
           if (findParam === undefined) {
             return undefined;

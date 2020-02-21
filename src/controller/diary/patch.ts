@@ -6,7 +6,7 @@ import { Diary, State } from "../../entity";
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const diaryId: number = Number(req.params.diaryId);
-    const { humidity, createdAt, note, weatherId, state, temperature } = req.body;
+    const { humidity, createdAt, note, weatherId, states: baseState, temperature } = req.body;
 
     const isDeleteImg: boolean | undefined = setImgDelQuery(req.query["img-del"]);
     if (isDeleteImg === undefined) {
@@ -64,14 +64,15 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     let { states } = updatedDiary;
     //! 상태변경
-    if (state?.length) {
+    if (baseState?.length) {
       // console.log(state);
       states = await Promise.all(
-        state.map(async (value: stateType) => {
+        baseState.map(async (value: stateType) => {
           const result = await State.findOrCreate(value.id, value.level);
           return result;
         }),
       );
+      // console.log(states);
       updatedDiary.states = states;
     }
 
