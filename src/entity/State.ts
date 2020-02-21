@@ -48,25 +48,26 @@ export default class State extends BaseEntity {
     return findState;
   }
 
-  static async findOrCreate(parameterId: number, level: number): Promise<State | undefined> {
+  static async insertByParamId(parameterId: number, level: number): Promise<State | undefined> {
     const findParameter: Parameter | undefined = await Parameter.findOne({ id: parameterId });
-    // console.log("---findParam", findParameter);
 
     if (findParameter === undefined) {
       return undefined;
     }
 
-    const findState = await this.findOne({ parameter: findParameter });
+    const { id } = (
+      await this.createQueryBuilder()
+        .insert()
+        .into(State)
+        .values({ level })
+        .execute()
+    ).identifiers[0];
 
-    if (findState === undefined) {
-      const newState = await this.insertState(findParameter, level);
-      return newState;
+    const findState = await this.findOne({ id });
+    if (findState) {
+      findState.parameter = findParameter;
+      findState.save();
     }
-
-    findState.level = level;
-    findState.parameter = findParameter;
-    await findState.save();
-    // console.log("findState.parameter", findState.parameter);
     return findState;
   }
 }

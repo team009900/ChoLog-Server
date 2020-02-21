@@ -6,7 +6,7 @@ import { Diary, State } from "../../entity";
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const diaryId: number = Number(req.params.diaryId);
-    const { humidity, createdAt, note, weatherId, states: baseState, temperature } = req.body;
+    const { humidity, createdAt, note, weatherId, states: baseStates, temperature } = req.body;
 
     const isDeleteImg: boolean | undefined = setImgDelQuery(req.query["img-del"]);
     if (isDeleteImg === undefined) {
@@ -62,18 +62,55 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       return;
     }
 
-    let { states } = updatedDiary;
     //! 상태변경
-    if (baseState?.length) {
-      // console.log(state);
-      states = await Promise.all(
-        baseState.map(async (value: stateType) => {
-          const result = await State.findOrCreate(value.id, value.level);
-          return result;
+    if (baseStates) {
+      let newStates: (State | undefined)[] = updatedDiary.states;
+      // console.log(baseStates);
+
+      //! 현재 state 받아와서 수정하고 없어진 state는 삭제
+      newStates = await Promise.all(
+        newStates.map(async (nState: State | undefined) => {
+          if (nState === undefined) {
+            return undefined;
+          }
+          const changeState = nState;
+          const targetState = baseStates.find((bState, index) => {
+            // console.log(bState, changeState);
+            if (bState.id === changeState.parameter.id) {
+              baseStates.splice(index, 1);
+              return true;
+            }
+            return false;
+          });
+          if (targetState) {
+            changeState.level = targetState.level;
+            return changeState.save();
+          }
+          await changeState.remove();
+          return undefined;
         }),
       );
-      // console.log(states);
-      updatedDiary.states = states;
+      // console.log(baseStates);
+
+      //! 새로 생긴 state 추가
+      const tmpStates: (State | undefined)[] = await Promise.all(
+        baseStates.map(
+          async (bState: stateType): Promise<State | undefined> => {
+            const result = await State.insertByParamId(bState.id, bState.level);
+            return result;
+          },
+        ),
+      );
+      newStates.push(...tmpStates);
+      // console.log(newStates);
+
+      updatedDiary.states = [];
+      newStates.forEach((nState) => {
+        if (nState) {
+          updatedDiary.states.push(nState);
+        }
+      });
+      // console.log(updatedDiary.states);
     }
 
     await updatedDiary.save();
