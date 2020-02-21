@@ -8,7 +8,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
   }
 
   try {
-    const findPlant = await Plant.findOne({ relations: ["parameters"] });
+    const findPlant = await Plant.findOne({ where: [{ id: plantId }], relations: ["parameters"] });
     if (findPlant === undefined) {
       res.status(404).json(`Plant ${plantId} does not exist`);
       return;

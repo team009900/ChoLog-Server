@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Parameter from "../../entity/Parameter";
 import postPlant from "./postPlant";
-import patchPlant from "./patchPlant";
 import getPlant from "./getPlant";
 
 const getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -15,4 +14,4 @@ const getAll = async (req: Request, res: Response, next: NextFunction): Promise<
   }
 };
 
-export { postPlant, getPlant, getAll, patchPlant };
+export { postPlant, getPlant, getAll };
