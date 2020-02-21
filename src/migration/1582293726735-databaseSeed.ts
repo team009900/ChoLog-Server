@@ -1,6 +1,4 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
-import { API } from "../entity";
-import { apiType } from "../@types/entity";
 import runDatabaseSeed from "../seed/databaseSeed";
 
 export default class databaseSeed1582293726735 implements MigrationInterface {
