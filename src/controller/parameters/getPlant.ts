@@ -1,6 +1,23 @@
 import { Request, Response, NextFunction } from "express";
+import Plant from "../../entity/Plant";
 
-export default (req: Request, res: Response, next: NextFunction): void => {
+export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { plantId } = req.params;
-  res.json(`plant parameters get. plantId: ${plantId}`);
+  if (!Number(plantId)) {
+    res.status(400).json("You send us bad request");
+  }
+
+  try {
+    const findPlant = await Plant.findOne({ relations: ["parameters"] });
+    if (findPlant === undefined) {
+      res.status(404).json(`Plant ${plantId} does not exist`);
+      return;
+    }
+
+    res.status(200).json(findPlant.parameters);
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(`Error: ${error}`);
+  }
 };
