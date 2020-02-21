@@ -6,15 +6,10 @@ import { diaryFormatting } from "../../services";
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { plantId } = req.params;
-    const {
-      createdAt,
-      note,
-      weatherId,
-      humidity,
-      finedust,
-      states: baseStates,
-      temperature,
-    } = req.body;
+    const { createdAt, note, weatherId, humidity, finedust, temperature } = req.body;
+    let { states: baseStates } = req.body;
+    baseStates = JSON.parse(baseStates);
+
     const multerS3: any = req.file;
     let image: string | undefined;
     if (multerS3) {
