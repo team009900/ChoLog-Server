@@ -157,6 +157,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
     }
 
     res.status(200).json(body);
+    return;
   } catch (error) {
     console.error(error);
     res.status(400).json(`Error: ${error}`);

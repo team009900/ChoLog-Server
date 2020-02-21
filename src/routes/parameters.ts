@@ -10,7 +10,7 @@ router.get("/", parametersController.getAll);
 router.post("/plant/:plantId", parametersController.postPlant);
 
 //* GET /parameters/plant/:plantId
-router.get("/plant/:plantId", parametersController.getAll);
+router.get("/plant/:plantId", parametersController.getPlant);
 
 //* PATCH /parameters/plant/:plantId
 router.patch("/plant/:plantId", parametersController.patchPlant);
