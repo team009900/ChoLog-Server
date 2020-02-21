@@ -10,9 +10,6 @@ export class weatherSeed1582195302838 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.query(
-      "ALTER TABLE `user` CHANGE `banned` `banned` timestamp NULL",
-      undefined,
-    );
+    await queryRunner.query("DELETE FROM `weather`", undefined);
   }
 }

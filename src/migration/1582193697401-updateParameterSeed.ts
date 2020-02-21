@@ -9,5 +9,7 @@ export class updateParameterSeed1582193697401 implements MigrationInterface {
     await getRepository("parameter").save(parameterSeed);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<any> {}
+  public async down(queryRunner: QueryRunner): Promise<any> {
+    await queryRunner.query("DELETE FROM `parameter`", undefined);
+  }
 }
