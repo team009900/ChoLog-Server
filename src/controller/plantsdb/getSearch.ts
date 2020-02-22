@@ -10,11 +10,17 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       return;
     }
 
-    const dataList = await PlantsDatabase.findPlantsDataList(target);
+    const dataList: PlantsDatabase[] | undefined = await PlantsDatabase.findPlantsDataList(target);
+
+    if (dataList === undefined) {
+      res.status(500).json("server database error");
+      return;
+    }
     // console.log(dataList);
     res.json(dataList);
+    return;
   } catch (err) {
     console.error(err);
-    res.status(400).json(`Error name: ${err.name}`);
+    res.status(500).json(`Error name: ${err.name}`);
   }
 };

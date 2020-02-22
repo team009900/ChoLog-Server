@@ -5,6 +5,16 @@ const setDetailPlantData = async (value: PlantsDatabase): Promise<true | false> 
   const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : "";
   const plantData = value;
   const { api, contentsNo } = plantData;
+  // console.log(plantData);
+
+  if (plantData.detail) {
+    // console.log("+ this plantData has detail value");
+    return true;
+  }
+
+  if (contentsNo === undefined || api === undefined) {
+    return false;
+  }
 
   const url = `${api.url}/${api.provider}Dtl?apiKey=${nongsaroKey}&cntntsNo=${contentsNo}`;
 
@@ -35,7 +45,8 @@ const setDetailPlantData = async (value: PlantsDatabase): Promise<true | false> 
     plantData.detail = newPlantDetail;
 
     await plantData.save();
-    // console.log(plantData);
+    console.log(plantData);
+
     return true;
   } catch (err) {
     console.error(err);

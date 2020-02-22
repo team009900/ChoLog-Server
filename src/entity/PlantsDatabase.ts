@@ -60,7 +60,7 @@ export default class PlantsDatabase extends BaseEntity {
   public updatedAt!: Date;
 
   //* 검색
-  static async findPlantsDataList(target: string): Promise<PlantsDatabase[]> {
+  static async findPlantsDataList(target: string): Promise<PlantsDatabase[] | undefined> {
     const dataList = await this.find({
       where: [
         { distributionName: Like(`%${target}%`) },
@@ -68,19 +68,24 @@ export default class PlantsDatabase extends BaseEntity {
         { englishName: Like(`%${target}%`) },
       ],
       relations: ["images", "api", "detail"],
-      select: ["id", "distributionName", "scientificName", "englishName"],
+      select: ["id", "distributionName", "scientificName", "englishName", "contentsNo"],
     });
-    console.log(dataList);
+    // console.log(dataList);
 
-    await Promise.all(
+    const runResult = await Promise.all(
       dataList.map((data: PlantsDatabase): Promise<boolean> => setDetailPlantData(data)),
     );
-    console.log(dataList);
+
+    // console.log(runResult);
+    if (runResult.includes(false)) {
+      return undefined;
+    }
 
     dataList.forEach((value: PlantsDatabase) => {
       const data = value;
       delete data.api;
       delete data.detail;
+      delete data.contentsNo;
     });
 
     return dataList;
