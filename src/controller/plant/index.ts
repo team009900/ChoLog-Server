@@ -326,14 +326,14 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
   const diaryFullDate = `${diaryYear}-${diaryMonth}`; // "YYYY-MM"
 
   try {
-    const findPlantDiary = await Plant.findDiariesById(plantId);
-    if (findPlantDiary === undefined) {
-      res.status(404).json(`Plant ${plantId} does not exist`);
-      return;
-    }
+    const findDiary = await Diary.find({
+      where: { plant: plantId },
+      relations: ["states", "states.parameter"],
+      order: { createdAt: "ASC" },
+    });
 
     const plantsDiary: Diary[] = [];
-    findPlantDiary.forEach((diary: Diary) => {
+    findDiary.forEach((diary: Diary) => {
       const tmpDiary: Diary = diary;
       const dateFormat = tmpDiary.createdAt.toISOString().slice(0, 10);
 
