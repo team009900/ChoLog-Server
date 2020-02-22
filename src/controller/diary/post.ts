@@ -38,8 +38,10 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     diaryDataKeys = Object.keys(diaryData);
     if (diaryDataKeys.length === 0 || (diaryDataKeys.length === 1 && diaryData.createdAt)) {
-      res.status(400).json("Send at least one date");
-      return;
+      if (weatherId === undefined && baseStates === undefined) {
+        res.status(400).json("Send at least one date");
+        return;
+      }
     }
 
     let states: State[] = [];
