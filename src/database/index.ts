@@ -4,8 +4,12 @@ import { plantsDatabaseType, apiType } from "../@types/entity";
 import { requestGetBody, setMyTimer } from "../services";
 import "dotenv/config";
 
-const settingBasicPlantData = async (api: API): Promise<true | false> => {
+const setDatabaseSeed = async (apiValue: apiType): Promise<true | false> => {
   try {
+    const api = await API.findOrCreate(apiValue.provider, apiValue.url);
+    if (api === undefined) {
+      return false;
+    }
     const { provider } = api;
     let { url } = api;
 
@@ -125,63 +129,6 @@ const settingBasicPlantData = async (api: API): Promise<true | false> => {
   }
 };
 
-//! 현재로직에서 실행 안 함 -> /plantsdb/search로 옮겨갈것임
-const settingDetailPlantData = async (value: PlantsDatabase): Promise<true | false> => {
-  const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : "";
-  const plantData = value;
-  const { api, contentsNo } = plantData;
-
-  const url = `${api.url}/${api.provider}Dtl?apiKey=${nongsaroKey}&cntntsNo=${contentsNo}`;
-
-  try {
-    //! API요청 후 데이터 가공(사용하기 편하게)
-    const detailData = (await requestGetBody(url, nongsaroKey)).response.body[0].item[0];
-    const detailDataKeys = Object.keys(detailData);
-    for (let i = 0; i < detailDataKeys.length; i += 1) {
-      const key = detailDataKeys[i];
-      const detailValue = detailData[key][0];
-      detailData[key] = detailValue;
-    }
-    // console.log(detailData);
-
-    if (api.provider === "garden") {
-      plantData.scientificName = detailData.plntbneNm;
-      plantData.englishName = detailData.plntzrNm;
-    } else if (api.provider === "dryGarden") {
-      plantData.englishName = detailData.plntzrNm;
-    }
-
-    const newPlantDetail = await PlantDetail.findOrCreate(JSON.stringify(detailData), "JSON");
-    // const newPlantDetail = await PlantDetail.findOne({ where: { id: 1 } });
-    // console.log(newPlantDetail);
-    if (newPlantDetail === undefined) {
-      return false;
-    }
-    plantData.detail = newPlantDetail;
-
-    await plantData.save();
-    // console.log(plantData);
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-};
-
-//! 현재로직에서 실행 안 함 -> /plantsdb/search로 옮겨갈것임
-const sendApiInterval = async (plantDataList: PlantsDatabase[]) => {
-  // console.log(plantDataList[0]);
-  const result: boolean = await settingDetailPlantData(plantDataList[0]);
-  plantDataList.shift();
-  if (plantDataList.length !== 0 && result) {
-    setTimeout(sendApiInterval.bind(sendApiInterval, plantDataList), 1000);
-  } else if (!result) {
-    console.log("result of setting detail plant data: false");
-  } else {
-    console.log("result of setting detail plant data: true");
-  }
-};
-
 createConnection().then(async () => {
   console.log("typeorm connection completed in database/index.ts");
   const apiData: apiType[] = [
@@ -195,12 +142,8 @@ createConnection().then(async () => {
     },
   ];
 
-  const apis = await Promise.all(
-    apiData.map((val: apiType): Promise<any> => API.findOrCreate(val.provider, val.url)),
-  );
-
   const result: boolean[] = [];
-  result.push(await settingBasicPlantData(apis[0]));
+  result.push(await setDatabaseSeed(apiData[0]));
   if (!result[0]) {
     console.log("result of setting basic plant data: false");
     return;
@@ -209,17 +152,10 @@ createConnection().then(async () => {
   //! 1초 후 요청보내기
   await setMyTimer(1000);
 
-  result.push(await settingBasicPlantData(apis[1]));
+  result.push(await setDatabaseSeed(apiData[1]));
   if (!result[1]) {
     console.log("result of setting basic plant data: false");
     return;
   }
   console.log("result of setting basic plant data: ", result);
-
-  const getAll: PlantsDatabase[] = await PlantsDatabase.find({
-    where: { detail: null },
-    relations: ["api", "detail"],
-  });
-  console.log(`** getAll.length: ${getAll.length}`);
-  await sendApiInterval(getAll.slice(0, 10));
 });
