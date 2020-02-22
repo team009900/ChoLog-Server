@@ -99,6 +99,6 @@ export default class Diary extends BaseEntity {
       return undefined;
     }
 
-    return this.findOne({ id }, { relations: ["plant", "states", "states.parameter"] });
+    return this.findOne({ id }, { relations: ["plant", "states", "states.parameter", "weather"] });
   }
 }
