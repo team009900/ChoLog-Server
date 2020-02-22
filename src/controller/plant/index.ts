@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import Plant from "../../entity/Plant";
 import { plantUpdateType } from "../../@types/entity";
-import Family from "../../entity/Family";
-import User from "../../entity/User";
+import { State, Family, User, Diary, Plant } from "../../entity";
 import { deleteImg } from "../../services";
-import Diary from "../../entity/Diary";
 
 // * 새 식물 생성 /plant
 const post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -342,6 +339,13 @@ const diaryGet = async (req: Request, res: Response, next: NextFunction): Promis
       const fullDate = `${year}-${month}`; // "YYYY-MM"
 
       if (diaryFullDate === fullDate) {
+        if (tmpDiary.states) {
+          tmpDiary.states.forEach((state: State): void => {
+            const targetState = state;
+            targetState.id = targetState.parameter.id;
+            delete targetState.parameter;
+          });
+        }
         plantsDiary.push(tmpDiary);
       }
     });
