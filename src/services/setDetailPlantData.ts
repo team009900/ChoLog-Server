@@ -29,6 +29,16 @@ const setDetailPlantData = async (value: PlantsDatabase): Promise<true | false> 
     }
     // console.log(detailData);
 
+    //! detail data에서 유통명 추가
+    const distributionName: string = detailData.distbNm;
+    if (distributionName) {
+      if (distributionName.match(plantData.distributionName)) {
+        plantData.distributionName = distributionName;
+      } else {
+        plantData.distributionName += `, ${distributionName}`;
+      }
+    }
+
     if (api.provider === "garden") {
       plantData.scientificName = detailData.plntbneNm;
       plantData.englishName = detailData.plntzrNm;
