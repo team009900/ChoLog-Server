@@ -77,11 +77,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       for (let i = 0; i < useInfos.length; i += 1) {
         const useInfo: { key: string; value: string } = useInfos[i];
         if (detail[useInfo.key]) {
-          // if (useInfo.key === "adviseInfo") {
-          //   if (advice.match("기타 정보") === undefined) {
-          //     useInfo.value = "기타 정보: ";
-          //   }
-          // }
           advice += `${useInfo.value}${detail[useInfo.key].split("<br />").join(" ")}.\n`;
         }
       }
