@@ -16,6 +16,7 @@ import API from "./API";
 import { plantsDatabaseType } from "../@types/entity";
 import PlantDataImg from "./PlantDataImg";
 import PlantDetail from "./PlantDetail";
+import setDetailPlantData from "../services/setDetailPlantData";
 
 @Entity()
 export default class PlantsDatabase extends BaseEntity {
@@ -59,16 +60,30 @@ export default class PlantsDatabase extends BaseEntity {
   public updatedAt!: Date;
 
   //* 검색
-  static findPlantsDataList(target: string): Promise<PlantsDatabase[] | undefined> {
-    return this.find({
+  static async findPlantsDataList(target: string): Promise<PlantsDatabase[]> {
+    const dataList = await this.find({
       where: [
         { distributionName: Like(`%${target}%`) },
         { scientificName: Like(`%${target}%`) },
         { englishName: Like(`%${target}%`) },
       ],
-      relations: ["images"],
+      relations: ["images", "api", "detail"],
       select: ["id", "distributionName", "scientificName", "englishName"],
     });
+    console.log(dataList);
+
+    await Promise.all(
+      dataList.map((data: PlantsDatabase): Promise<boolean> => setDetailPlantData(data)),
+    );
+    console.log(dataList);
+
+    dataList.forEach((value: PlantsDatabase) => {
+      const data = value;
+      delete data.api;
+      delete data.detail;
+    });
+
+    return dataList;
   }
 
   //* 데이터 입력

@@ -25,7 +25,7 @@ export default class PlantDetail extends BaseEntity {
   @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   public updatedAt!: Date;
 
-  static async insertPlantDetail(contents: string, type: string): Promise<PlantDetail | undefined> {
+  static async findOrCreate(contents: string, type: string): Promise<PlantDetail | undefined> {
     const findPlant = await this.findOne({ contents });
     if (findPlant) {
       return findPlant;
