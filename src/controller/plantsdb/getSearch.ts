@@ -16,6 +16,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       res.status(500).json("server database error");
       return;
     }
+    console.log("+ data length: ", dataList.length);
     // console.log(dataList);
     res.json(dataList);
     return;
