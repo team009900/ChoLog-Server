@@ -45,7 +45,7 @@ const setDetailPlantData = async (value: PlantsDatabase): Promise<true | false> 
     plantData.detail = newPlantDetail;
 
     await plantData.save();
-    console.log(plantData);
+    // console.log(plantData);
 
     return true;
   } catch (err) {
