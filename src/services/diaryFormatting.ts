@@ -8,8 +8,13 @@ export default (value: Diary): Diary => {
   delete diary.updatedAt;
 
   //! weather 데이터 가공
-  (<any>diary).weatherId = diary.weather.id;
-  delete diary.weather;
+  if (diary.weather) {
+    (<any>diary).weatherId = diary.weather.id;
+    delete diary.weather;
+  } else {
+    (<any>diary).weatherId = null;
+    delete diary.weather;
+  }
 
   //! plant 데이터 가공
   const plantKeys = Object.keys(diary.plant);
