@@ -20,7 +20,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     // console.log(findPlantData);
 
     const detail: any = JSON.parse(findPlantData.detail.contents);
-    console.log(`+++++ ${plantsDBId}: ${findPlantData.distributionName}`, detail);
+    console.log(`+++++ ${plantsDBId}:\n${findPlantData.distributionName}`, detail);
 
     const { provider } = findPlantData.api;
     let advice: string = "";
@@ -36,10 +36,26 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       const indexStart = familyName.lastIndexOf("(");
       (<any>findPlantData).familyName = familyName.substring(indexStart + 1, familyName.length - 1);
 
-      advice = detail.chartrInfo.split("<br />").join(". ");
+      const useInfos: { key: string; value: string }[] = [
+        { key: "waterCycleInfo", value: "물주기는 " },
+        { key: "lighttInfo", value: "빛은 " },
+        { key: "frtlzrInfo", value: "비료는 " },
+        { key: "dlthtsInfo", value: "병충해는 " },
+        { key: "flwrInfo", value: "꽃은 " },
+        { key: "grwhTpInfo", value: "생육온도는 " },
+        { key: "pswntrTpInfo", value: "월동온도는 " },
+        { key: "chartrInfo", value: "" },
+      ];
+
+      for (let i = 0; i < useInfos.length; i += 1) {
+        const useInfo = useInfos[i];
+        if (detail[useInfo.key]) {
+          advice += `${useInfo.value}${detail[useInfo.key].split("<br />").join(" ")}.\n`;
+        }
+      }
     }
 
-    (<any>findPlantData).advice = advice;
+    (<any>findPlantData).advice = advice.substring(0, advice.length - 1);
     findPlantData.detail = detail;
 
     delete findPlantData.detail;
