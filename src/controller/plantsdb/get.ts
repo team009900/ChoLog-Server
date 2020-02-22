@@ -22,7 +22,8 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
 
     if (findPlantData.detail) {
       const detail: any = JSON.parse(findPlantData.detail.contents);
-      console.log(`+++++ ${plantsDBId}: ${findPlantData.distributionName}\n`, detail);
+      console.log(`+++++ ${plantsDBId}: ${findPlantData.distributionName}`);
+      // console.log(`+++++ ${plantsDBId}: ${findPlantData.distributionName}\n`, detail);
 
       const { provider } = findPlantData.api;
       let useInfos: { key: string; value: string }[] = [];
@@ -46,8 +47,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
           { key: "watercycleWinterCodeNm", value: "물주기(겨울): " },
           // { key: "frtlzrInfo", value: "비료: " },
           { key: "lighttdemanddoCodeNm", value: "빛: " },
-          // { key: "hdCodeNm", value: "적정습도: " },
-          // { key: "hdCodeNm", value: "적정습도: " },
           { key: "fncltyInfo", value: "기타관리 정보:" },
           // { key: "postngplaceCodeNm", value: "배치장소: " },
           // { key: "adviseInfo", value: "기타 정보:" },
