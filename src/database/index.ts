@@ -1,64 +1,13 @@
 import { createConnection } from "typeorm";
-import * as request from "request";
-import { parseString } from "xml2js";
-import "dotenv/config";
-import API from "../entity/API";
+import { API, PlantsDatabase, PlantDataImg, PlantDetail } from "../entity";
 import { plantsDatabaseType, apiType } from "../@types/entity";
-import PlantsDatabase from "../entity/PlantsDatabase";
-import PlantDataImg from "../entity/PlantDataImg";
-import PlantDetail from "../entity/PlantDetail";
+import { requestGetBody, setMyTimer } from "../services";
+import "dotenv/config";
 
-const makeXmlToStr = (body: string): Promise<any> => {
-  const strPromise: Promise<any> = new Promise((resolve, reject) => {
-    parseString(body, (err, result) => {
-      if (err) reject(err);
-      else resolve(result);
-    });
-  });
-  return strPromise;
-};
-
-const requestGetBody = (url: string, key: string, log: boolean = true): Promise<any> => {
-  const requestAns: Promise<any> = new Promise((resolve, reject) => {
-    request(url, async (error: any, response: request.Response, body: any) => {
-      const statusCode: number = response && response.statusCode;
-      if (log) {
-        console.log(`--- url: ${url.split(key).join("***")}`);
-        console.log("error:", error);
-        console.log("statusCode:", response && response.statusCode);
-      }
-      if (error) {
-        reject(error);
-      }
-      if (statusCode.toString()[0] !== "2") {
-        console.log(body);
-        reject(new Error(`statusCode: ${statusCode}`));
-      }
-      // XML을 배열로 바꿈
-      const xmlToStr = await makeXmlToStr(body);
-      resolve(xmlToStr);
-    });
-  });
-  return requestAns;
-};
-
-const setTimer = (time: number) => {
-  const newPromise: any = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-  return newPromise;
-};
-
-const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
+const settingBasicPlantData = async (api: API): Promise<true | false> => {
   try {
     const { provider } = api;
     let { url } = api;
-    const oneOfApi: API | undefined = await API.findByProvider(provider);
-    if (oneOfApi === undefined) {
-      return false;
-    }
 
     if (provider === "garden" || provider === "dryGarden") {
       const nongsaroKey: string = process.env.NONGSARO_KEY ? process.env.NONGSARO_KEY : ""; // 농사로API 사용
@@ -86,9 +35,6 @@ const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
         parameter.imgUrl = ""; // image url이 필요없음
         parameter.scientificName = "scnm";
       }
-
-      //! 1초 후 요청보내기
-      await setTimer(1000);
 
       //! 유통명과 contents number를 한번에 받아오기 위한 API요청
       responseOfUrl = await requestGetBody(`${url}&numOfRows=${totalCount}`, nongsaroKey);
@@ -161,7 +107,7 @@ const settingBasicPlantData = async (api: apiType): Promise<true | false> => {
           });
 
           //* 생성된 PlantDatabase에 api추가
-          newPlantDatabase.api = oneOfApi;
+          newPlantDatabase.api = api;
 
           await newPlantDatabase.save();
           // console.log(newPlantDatabase);
@@ -205,7 +151,7 @@ const settingDetailPlantData = async (value: PlantsDatabase): Promise<true | fal
       plantData.englishName = detailData.plntzrNm;
     }
 
-    const newPlantDetail = await PlantDetail.insertPlantDetail(JSON.stringify(detailData), "JSON");
+    const newPlantDetail = await PlantDetail.findOrCreate(JSON.stringify(detailData), "JSON");
     // const newPlantDetail = await PlantDetail.findOne({ where: { id: 1 } });
     // console.log(newPlantDetail);
     if (newPlantDetail === undefined) {
@@ -238,7 +184,7 @@ const sendApiInterval = async (plantDataList: PlantsDatabase[]) => {
 
 createConnection().then(async () => {
   console.log("typeorm connection completed in database/index.ts");
-  const apis: apiType[] = [
+  const apiData: apiType[] = [
     {
       provider: "garden",
       url: "http://api.nongsaro.go.kr/service/garden",
@@ -249,7 +195,9 @@ createConnection().then(async () => {
     },
   ];
 
-  await Promise.all(apis.map((val: apiType): Promise<any> => API.insertAPI(val.provider, val.url)));
+  const apis = await Promise.all(
+    apiData.map((val: apiType): Promise<any> => API.findOrCreate(val.provider, val.url)),
+  );
 
   const result: boolean[] = [];
   result.push(await settingBasicPlantData(apis[0]));
@@ -257,6 +205,10 @@ createConnection().then(async () => {
     console.log("result of setting basic plant data: false");
     return;
   }
+
+  //! 1초 후 요청보내기
+  await setMyTimer(1000);
+
   result.push(await settingBasicPlantData(apis[1]));
   if (!result[1]) {
     console.log("result of setting basic plant data: false");
@@ -264,10 +216,10 @@ createConnection().then(async () => {
   }
   console.log("result of setting basic plant data: ", result);
 
-  // const getAll: PlantsDatabase[] = await PlantsDatabase.find({
-  //   where: { detail: null },
-  //   relations: ["api", "detail"],
-  // });
-  // console.log(`** getAll.length: ${getAll.length}`);
-  // await sendApiInterval(getAll.slice(0, 10));
+  const getAll: PlantsDatabase[] = await PlantsDatabase.find({
+    where: { detail: null },
+    relations: ["api", "detail"],
+  });
+  console.log(`** getAll.length: ${getAll.length}`);
+  await sendApiInterval(getAll.slice(0, 10));
 });
