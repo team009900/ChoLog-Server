@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { setImgDelQuery, removeNullKeys, deleteImg } from "../../services";
 import { diaryUpdateType, stateType } from "../../@types/entity";
-import { Diary, State } from "../../entity";
+import { Diary, State, Weather } from "../../entity";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const diaryId: number = Number(req.params.diaryId);
-    const { humidity, createdAt, note, weatherId, temperature } = req.body;
+    const { humidity, createdAt, note, weatherId, temperature, finedust } = req.body;
     let { states: baseStates } = req.body;
-    baseStates = JSON.parse(baseStates);
+    if (baseStates) {
+      baseStates = JSON.parse(baseStates);
+    }
 
     const isDeleteImg: boolean | undefined = setImgDelQuery(req.query["img-del"]);
     if (isDeleteImg === undefined) {
@@ -26,9 +28,9 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       humidity,
       createdAt,
       note,
-      weatherId,
       temperature,
       image,
+      finedust,
     };
 
     //! body로 입력되지 않은 데이터의 key value쌍 삭제
@@ -62,6 +64,17 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     if (updatedDiary === undefined) {
       res.status(404).json("invalid diary id");
       return;
+    }
+
+    //! 날씨 수정
+    if (weatherId) {
+      const findWeather = await Weather.findOne({ id: weatherId });
+      if (findWeather === undefined) {
+        res.status(400).json("Fail to find weather");
+        return;
+      }
+
+      updatedDiary.weather = findWeather;
     }
 
     //! 상태변경

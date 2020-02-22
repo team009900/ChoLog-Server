@@ -1,5 +1,6 @@
 import PlantDataImg from "../../entity/PlantDataImg";
 import State from "../../entity/State";
+import { Weather } from "../../entity";
 
 declare namespace entity {
   interface userUpdateType {
@@ -33,12 +34,10 @@ declare namespace entity {
     image?: string;
     note?: string;
     temperature?: number;
-    weatherName?: string;
     humidity?: number;
     finedust?: number;
     createdAt: Date;
-    state?: stateType[];
-    weatherId?: number;
+    weather?: Weather;
     states?: State[];
   }
 
@@ -46,12 +45,10 @@ declare namespace entity {
     image?: string;
     note?: string;
     temperature?: number;
-    weatherName?: string;
     humidity?: number;
     finedust?: number;
     createdAt?: Date;
-    state?: stateType[];
-    weatherId?: number;
+    weather?: Weather;
     states?: State[];
   }
 

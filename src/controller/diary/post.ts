@@ -8,7 +8,9 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     const { plantId } = req.params;
     const { createdAt, note, weatherId, humidity, finedust, temperature } = req.body;
     let { states: baseStates } = req.body;
-    baseStates = JSON.parse(baseStates);
+    if (baseStates) {
+      baseStates = JSON.parse(baseStates);
+    }
 
     const multerS3: any = req.file;
     let image: string | undefined;
@@ -23,7 +25,6 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
       finedust,
       image,
       temperature,
-      weatherId,
     };
 
     //! body로 입력되지 않은 데이터의 key value쌍 삭제
