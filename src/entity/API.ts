@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  InsertResult,
 } from "typeorm";
 import PlantsDatabase from "./PlantsDatabase";
 
