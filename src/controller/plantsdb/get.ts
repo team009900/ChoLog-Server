@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { userInfo } from "os";
 import { PlantsDatabase } from "../../entity";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
