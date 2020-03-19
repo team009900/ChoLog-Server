@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es5", "es6"],
+    "target": "ES2015",
+    "module": "commonjs",
+    "strict": true,
+    "noImplicitAny": false, //동적으로 바뀌는 key값으로 object를 사용하기 위해
+    "esModuleInterop": false,
+
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
